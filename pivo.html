@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Controle de irrigação por pivô central</title>
+<meta name="description" content="Simulação de controle de irrigação: pivô central e casa de bomba comunicando-se via rádio conforme o movimento do pivô." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --background: oklch(0.985 0.006 250);
+    --foreground: oklch(0.24 0.04 258);
+    --card: oklch(0.99 0.007 250);
+    --primary: oklch(0.55 0.22 264);
+    --primary-foreground: oklch(0.99 0.006 250);
+    --secondary: oklch(0.94 0.03 250);
+    --secondary-foreground: oklch(0.3 0.035 258);
+    --muted: oklch(0.96 0.02 250);
+    --muted-foreground: oklch(0.5 0.03 255);
+    --destructive: oklch(0.58 0.22 25);
+    --border: oklch(0.87 0.03 250);
+    --water: oklch(0.6 0.18 220);
+    --water-deep: oklch(0.42 0.19 235);
+    --signal: oklch(0.72 0.18 68);
+    --signal-deep: oklch(0.5 0.18 68);
+    --pump-on: oklch(0.68 0.19 148);
+    --pump-on-deep: oklch(0.48 0.18 148);
+    --pump-off: oklch(0.6 0.03 255);
+    --destructive-deep: oklch(0.46 0.21 24);
+    --soil: oklch(0.72 0.05 75);
+    --soil-deep: oklch(0.56 0.06 68);
+    --field: oklch(0.64 0.15 142);
+    --field-deep: oklch(0.5 0.15 142);
+    --steel: oklch(0.5 0.045 250);
+    --steel-dark: oklch(0.3 0.045 252);
+    --sky: oklch(0.92 0.04 235);
+    --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 72rem; margin: 0 auto; padding: 2rem 1rem 3rem; }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+  .kicker { font-family: var(--font-mono); font-size: .75rem; text-transform: uppercase; letter-spacing: .25em; color: var(--primary); margin: 0; }
+  h1 { font-size: 2rem; letter-spacing: -.02em; margin: .5rem 0 0; }
+  .lead { margin: .5rem 0 0; max-width: 40rem; font-size: .875rem; color: var(--muted-foreground); }
+  .buttons { display: flex; gap: .5rem; }
+  button {
+    font: 600 .875rem var(--font-sans); cursor: pointer; border-radius: .375rem;
+    padding: .55rem 1rem; border: 1px solid transparent; transition: filter .15s, background .15s, opacity .15s;
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+  #toggle { background: var(--primary); color: var(--primary-foreground); }
+  #toggle:hover { filter: brightness(1.1); }
+  #reset { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--border); }
+  #reset:hover { background: var(--muted); }
+  .panel { border: 1px solid var(--border); background: var(--card); border-radius: .75rem; }
+  .diagram { overflow: hidden; box-shadow: 0 10px 25px -12px rgba(15, 40, 80, .25); }
+  .controls { margin-top: 1.5rem; padding: 1.25rem; }
+  .controls h2 { font: 400 .75rem var(--font-mono); text-transform: uppercase; letter-spacing: .2em; color: var(--muted-foreground); margin: 0; }
+  svg { display: block; width: 100%; height: auto; }
+  .ctrl-buttons { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+  .btn-start { background: var(--pump-on); color: var(--primary-foreground); }
+  .btn-start:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn-stop { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--border); }
+  .btn-stop:hover:not(:disabled) { background: var(--muted); }
+  .btn-emergency { background: var(--destructive); color: var(--primary-foreground); }
+  .btn-emergency:hover:not(:disabled) { filter: brightness(1.08); }
+  @keyframes ping-ring { 0% { transform: scale(.6); opacity: .9 } 100% { transform: scale(2.2); opacity: 0 } }
+  @keyframes flow { to { stroke-dashoffset: -24 } }
+  @keyframes blink { to { opacity: .3 } }
+  .ping-ring { animation: ping-ring 1.2s ease-out infinite; transform-box: view-box; }
+  .flow { animation: flow .6s linear infinite; }
+  .blink { animation: blink .8s steps(2) infinite; }
+  /* rótulos do diagrama: cor mais forte e negrito para dar destaque, sem contorno */
+  .lbl-title { font-family: var(--font-sans); font-weight: 700; letter-spacing: .09em; }
+  .lbl-sub { font-family: var(--font-mono); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="kicker">Telemetria • Rádio</p>
+      <h1>Controle de irrigação por pivô central</h1>
+      <p class="lead">O pivô transmite seu estado de movimento via rádio para a casa de bomba. Assim que começa a girar, ele liga a bomba e a água é enviada até a ponta do pivô; ao parar — manualmente, automaticamente ao fim do setor programado ou por emergência — o sinal desliga a bomba na hora.</p>
+    </div>
+    <div class="buttons">
+      <button id="toggle">Pausar</button>
+      <button id="reset">Reiniciar</button>
+    </div>
+  </header>
+
+  <section class="panel diagram">
+    <svg id="svg" viewBox="0 0 960 780" role="img" aria-label="Diagrama: casa de bomba e pivô central"></svg>
+  </section>
+
+  <section class="panel controls">
+    <h2>Controle do pivô</h2>
+    <div class="ctrl-buttons">
+      <button id="start-pivot" class="btn-start">Ligar pivô</button>
+      <button id="stop-pivot" class="btn-stop">Parar pivô</button>
+      <button id="emergency" class="btn-emergency">Parada de emergência</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------------- Geometria ---------------- */
+const VB_W = 960, VB_H = 780;
+const groundY = 200;
+
+// casa de bomba (mesma linguagem visual do projeto do reservatório, agora com bomba embutida)
+const gwAnt = { x: 105, y: groundY - 130 };
+const roofApex = groundY - 95;
+
+// pivô central: campo circular visto de cima, torre central em elevação (maior e mais detalhado)
+const pcx = 630, pcy = 460, R = 210;
+const towerFracs = [0.2, 0.38, 0.55, 0.72, 0.88];
+const HOP_MIN_LABEL = { liga: "LIGA", desliga: "DESLIGA" };
+
+function polar(cx, cy, r, deg) {
+  const a = deg * Math.PI / 180;
+  return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+}
+
+const pipePath = `M 105 ${groundY + 8} L 105 ${pcy} L ${pcx - 16} ${pcy}`;
+
+// torre central: treliça em prisma, pequena, pendurada logo abaixo do ponto (pcx,pcy) — o braço nasce
+// exatamente no topo dela (que é o próprio centro do círculo), e a base afunilada fica visível abaixo
+const TOWER_H = 32, TOWER_BASE_HW = 15, TOWER_TOP_HW = 5;
+const TOWER_BASE_Y = pcy + TOWER_H;
+const centralTower = (() => {
+  const levels = [0, 0.5, 1].map((f) => ({
+    y: pcy + f * TOWER_H,
+    hw: TOWER_TOP_HW + (TOWER_BASE_HW - TOWER_TOP_HW) * f,
+  }));
+  let rungs = "", braces = "";
+  levels.forEach((l, i) => {
+    rungs += `<line x1="${pcx - l.hw}" y1="${l.y}" x2="${pcx + l.hw}" y2="${l.y}" stroke="var(--steel-dark)" stroke-width="1.6"/>`;
+    if (i < levels.length - 1) {
+      const n = levels[i + 1];
+      braces += `<line x1="${pcx - l.hw}" y1="${l.y}" x2="${pcx + n.hw}" y2="${n.y}" stroke="var(--steel)" stroke-width="1.1" opacity="0.85"/>
+        <line x1="${pcx + l.hw}" y1="${l.y}" x2="${pcx - n.hw}" y2="${n.y}" stroke="var(--steel)" stroke-width="1.1" opacity="0.85"/>`;
+    }
+  });
+  return `
+    <ellipse cx="${pcx}" cy="${TOWER_BASE_Y}" rx="${TOWER_BASE_HW + 4}" ry="4" fill="var(--steel-dark)"/>
+    <line x1="${pcx - TOWER_TOP_HW}" y1="${pcy}" x2="${pcx - TOWER_BASE_HW}" y2="${TOWER_BASE_Y}" stroke="var(--steel-dark)" stroke-width="2"/>
+    <line x1="${pcx + TOWER_TOP_HW}" y1="${pcy}" x2="${pcx + TOWER_BASE_HW}" y2="${TOWER_BASE_Y}" stroke="var(--steel-dark)" stroke-width="2"/>
+    ${rungs}
+    ${braces}
+    <rect x="${pcx - 7}" y="${pcy - 20}" width="14" height="20" rx="2" fill="var(--card)" stroke="var(--steel)" stroke-width="1.5"/>
+    <line x1="${pcx}" y1="${pcy - 20}" x2="${pcx}" y2="${pcy - 38}" stroke="var(--steel)" stroke-width="1.5"/>
+    <line x1="${pcx - 5}" y1="${pcy - 28}" x2="${pcx + 5}" y2="${pcy - 28}" stroke="var(--steel)" stroke-width="1.3"/>
+    <line x1="${pcx - 3}" y1="${pcy - 34}" x2="${pcx + 3}" y2="${pcy - 34}" stroke="var(--steel)" stroke-width="1.3"/>
+  `;
+})();
+const baseAnt = { x: pcx, y: pcy - 38 }; // antena de rádio da base — é daqui que o pivô transmite pra casa de bomba
+
+/* ---------------- Estado ---------------- */
+const cfg = { speed: 8, sector: 360, hop: 2 };
+let running = true;
+let s;
+function initialState() {
+  // o pivô já nasce girando: dispara o "liga" imediatamente, mostrando a causalidade movimento -> sinal -> bomba
+  return { time: 0, theta: 0, startTheta: 0, pivotState: "running", stopReason: null,
+           phase: "tx", signalType: "liga", phaseStart: 0, pumpOn: false };
+}
+s = initialState();
+
+function startTx(type) { s.phase = "tx"; s.signalType = type; s.phaseStart = s.time; }
+function startPivot() {
+  if (s.pivotState === "running") return;
+  s.pivotState = "running"; s.stopReason = null; s.startTheta = s.theta;
+  startTx("liga");
+}
+function stopPivot(reason) {
+  if (s.pivotState !== "running") return;
+  s.pivotState = "stopped"; s.stopReason = reason;
+  startTx("desliga");
+}
+
+function tick(dt) {
+  s.time += dt;
+  if (s.pivotState === "running") {
+    s.theta += cfg.speed * dt;
+    const travel = s.theta - s.startTheta;
+    if (travel >= cfg.sector) stopPivot("auto");
+  }
+  const elapsed = s.time - s.phaseStart;
+  if (s.phase === "tx" && elapsed >= cfg.hop) {
+    s.pumpOn = s.signalType === "liga";
+    s.phase = "idle";
+    s.signalType = null;
+  }
+}
+
+/* ---------------- Render ---------------- */
+const svg = document.getElementById("svg");
+
+function ring(x, y, color) {
+  return `<g class="ping-ring" style="transform-origin:${x}px ${y}px">
+    <circle cx="${x}" cy="${y}" r="14" fill="none" stroke="${color}" stroke-width="2"/></g>`;
+}
+function packet(path, color, label, duration) {
+  return `<g>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.7"/>
+    <g><circle r="6" fill="${color}"/><circle r="10" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.6"/>
+      <text y="-16" text-anchor="middle" font-size="10" font-weight="600" fill="${color}" font-family="var(--font-mono)">${label}</text>
+      <animateMotion dur="${duration}s" path="${path}" fill="freeze"/></g></g>`;
+}
+function sprayMarks(spread) {
+  const s2 = spread || 1;
+  return `<g stroke="var(--water)" stroke-width="${1.3 * s2}" opacity="0.8" stroke-linecap="round" class="blink">
+    <line x1="${-5*s2}" y1="${6*s2}" x2="${-7*s2}" y2="${12*s2}"/>
+    <line x1="0" y1="${6*s2}" x2="0" y2="${13*s2}"/>
+    <line x1="${5*s2}" y1="${6*s2}" x2="${7*s2}" y2="${12*s2}"/>
+  </g>`;
+}
+function warningIcon() {
+  return `<g class="blink">
+    <polygon points="0,-24 -7,-12 7,-12" fill="var(--destructive)" stroke="var(--destructive-deep)" stroke-width="1"/>
+    <text x="0" y="-14" text-anchor="middle" font-size="9" font-weight="700" fill="var(--primary-foreground)" font-family="var(--font-mono)">!</text>
+  </g>`;
+}
+
+function statusLabel() {
+  if (s.pivotState === "running") return { text: "● EM MOVIMENTO", color: "var(--pump-on-deep)" };
+  if (s.stopReason === "emergencia") return { text: "○ PARADO — EMERGÊNCIA", color: "var(--destructive-deep)" };
+  if (s.stopReason === "auto") return { text: "○ PARADO — FIM DO SETOR", color: "var(--signal-deep)" };
+  return { text: "○ PARADO — MANUAL", color: "var(--muted-foreground)" };
+}
+
+function render() {
+  const pumpOn = s.pumpOn, tx = s.phase === "tx";
+  const sig = s.signalType === "liga" ? "var(--pump-on)" : "var(--destructive)";
+  const rad = s.theta * Math.PI / 180;
+  const tipX = pcx + R * Math.cos(rad), tipY = pcy + R * Math.sin(rad);
+  const status = statusLabel();
+  const travel = Math.max(0, s.theta - s.startTheta);
+  const pct = Math.min(100, (travel / cfg.sector) * 100);
+
+  let towers = "";
+  towerFracs.forEach((f, i) => {
+    const p = polar(pcx, pcy, R * f, s.theta);
+    towers += `<g id="tower-${i}" transform="translate(${p.x} ${p.y})">
+      <line x1="-9" y1="10" x2="0" y2="-3" stroke="var(--steel-dark)" stroke-width="2"/>
+      <line x1="9" y1="10" x2="0" y2="-3" stroke="var(--steel-dark)" stroke-width="2"/>
+      <line x1="-4.5" y1="5" x2="4.5" y2="5" stroke="var(--steel)" stroke-width="1.2" opacity="0.85"/>
+      <circle cx="-9" cy="10" r="5" fill="var(--steel)" stroke="var(--steel-dark)" stroke-width="1.3"/>
+      <circle cx="9" cy="10" r="5" fill="var(--steel)" stroke="var(--steel-dark)" stroke-width="1.3"/>
+      <circle cx="0" cy="-3" r="3" fill="var(--steel-dark)"/>
+      ${pumpOn ? sprayMarks(1.2) : ""}
+    </g>`;
+  });
+
+  const midX = (baseAnt.x + gwAnt.x) / 2, midY = Math.min(baseAnt.y, gwAnt.y) - 60;
+  const hopPath = `M ${baseAnt.x} ${baseAnt.y} Q ${midX} ${midY} ${gwAnt.x} ${gwAnt.y}`;
+
+  svg.innerHTML = `
+  <defs>
+    <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--soil)"/><stop offset="100%" stop-color="var(--soil-deep)"/>
+    </linearGradient>
+    <radialGradient id="fieldGrad" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="var(--field)"/><stop offset="100%" stop-color="var(--field-deep)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="${VB_W}" height="${VB_H}" fill="var(--sky)"/>
+  <rect y="${groundY}" width="${VB_W}" height="${VB_H - groundY}" fill="url(#groundGrad)"/>
+  <line x1="0" y1="${groundY}" x2="${VB_W}" y2="${groundY}" stroke="var(--steel)" stroke-width="1.5"/>
+
+  <path d="${pipePath}" fill="none" stroke="var(--steel-dark)" stroke-width="10" stroke-linejoin="round"/>
+  <path d="${pipePath}" fill="none" stroke="${pumpOn ? "var(--water)" : "var(--steel)"}" stroke-width="4"
+        stroke-linejoin="round" stroke-dasharray="${pumpOn ? "12 12" : "0"}" class="${pumpOn ? "flow" : ""}"/>
+
+  <!-- CASA DE BOMBA (rádio + bomba) -->
+  <g>
+    <polygon points="55,${groundY - 60} 105,${groundY - 95} 155,${groundY - 60}" fill="var(--steel-dark)" stroke="var(--steel)"/>
+    <rect x="60" y="${groundY - 60}" width="90" height="60" fill="var(--card)" stroke="var(--steel)" stroke-width="1.5"/>
+    <rect x="93" y="${groundY - 35}" width="24" height="35" fill="var(--sky)" stroke="var(--steel)"/>
+    <rect x="70" y="${groundY - 50}" width="14" height="12" fill="${tx ? "var(--signal)" : "var(--sky)"}" stroke="var(--steel)"/>
+    <rect x="122" y="${groundY - 50}" width="16" height="12" rx="2" fill="${pumpOn ? "var(--pump-on)" : "var(--pump-off)"}" stroke="var(--steel)"/>
+    <circle cx="130" cy="${groundY - 44}" r="3.5" fill="var(--sky)" class="${pumpOn ? "blink" : ""}"/>
+    <line x1="${gwAnt.x}" y1="${gwAnt.y}" x2="${gwAnt.x}" y2="${roofApex}" stroke="var(--steel)" stroke-width="2.5"/>
+    <line x1="${gwAnt.x - 12}" y1="${gwAnt.y + 14}" x2="${gwAnt.x + 12}" y2="${gwAnt.y + 14}" stroke="var(--steel)" stroke-width="2"/>
+    <line x1="${gwAnt.x - 8}" y1="${gwAnt.y + 28}" x2="${gwAnt.x + 8}" y2="${gwAnt.y + 28}" stroke="var(--steel)" stroke-width="2"/>
+    <circle cx="${gwAnt.x}" cy="${gwAnt.y}" r="4" fill="var(--signal)" class="${tx ? "blink" : ""}"/>
+    ${tx ? ring(gwAnt.x, gwAnt.y, sig) : ""}
+    <text class="lbl-title" x="105" y="35" text-anchor="middle" font-size="13" fill="var(--foreground)">CASA DE BOMBA</text>
+    <text class="lbl-sub" x="105" y="52" text-anchor="middle" font-size="11"
+          fill="${pumpOn ? "var(--pump-on-deep)" : "var(--muted-foreground)"}">${pumpOn ? "● BOMBA LIGADA" : "○ BOMBA DESLIGADA"}</text>
+  </g>
+
+  <!-- PIVÔ CENTRAL (campo visto de cima, torre em elevação) -->
+  <g>
+    <circle cx="${pcx}" cy="${pcy}" r="${R}" fill="url(#fieldGrad)" stroke="var(--field-deep)" stroke-width="2"/>
+    <circle cx="${pcx}" cy="${pcy}" r="${R * 0.28}" fill="none" stroke="var(--field-deep)" stroke-width="1" opacity="0.35"/>
+    <circle cx="${pcx}" cy="${pcy}" r="${R * 0.52}" fill="none" stroke="var(--field-deep)" stroke-width="1" opacity="0.35"/>
+    <circle cx="${pcx}" cy="${pcy}" r="${R * 0.76}" fill="none" stroke="var(--field-deep)" stroke-width="1" opacity="0.35"/>
+
+    ${centralTower}
+    <circle cx="${baseAnt.x}" cy="${baseAnt.y}" r="3.5" fill="var(--signal)" class="${tx ? "blink" : ""}"/>
+    ${tx ? ring(baseAnt.x, baseAnt.y, sig) : ""}
+
+    <line id="arm-line-outer" x1="${pcx}" y1="${pcy}" x2="${tipX}" y2="${tipY}" stroke="var(--steel-dark)" stroke-width="7" stroke-linecap="round"/>
+    <line id="arm-line-flow" x1="${pcx}" y1="${pcy}" x2="${tipX}" y2="${tipY}"
+          stroke="${pumpOn ? "var(--water)" : "var(--steel)"}" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="${pumpOn ? "10 10" : "0"}" class="${pumpOn ? "flow" : ""}"/>
+    ${towers}
+
+    <g id="tip-group" transform="translate(${tipX} ${tipY})">
+      <line x1="-12" y1="13" x2="0" y2="-4" stroke="var(--steel-dark)" stroke-width="2.5"/>
+      <line x1="12" y1="13" x2="0" y2="-4" stroke="var(--steel-dark)" stroke-width="2.5"/>
+      <line x1="-6" y1="6" x2="6" y2="6" stroke="var(--steel)" stroke-width="1.4" opacity="0.85"/>
+      <circle cx="-12" cy="13" r="6" fill="var(--steel)" stroke="var(--steel-dark)" stroke-width="1.5"/>
+      <circle cx="12" cy="13" r="6" fill="var(--steel)" stroke="var(--steel-dark)" stroke-width="1.5"/>
+      <circle cx="0" cy="-4" r="3" fill="var(--steel-dark)"/>
+      <line x1="5" y1="-4" x2="5" y2="-11" stroke="var(--steel)" stroke-width="1.2"/>
+      <circle cx="5" cy="-11" r="2" fill="var(--destructive)"/>
+      ${pumpOn ? sprayMarks(1.3) : ""}
+      ${s.stopReason === "emergencia" ? warningIcon() : ""}
+    </g>
+
+    <text id="progress-label" class="lbl-title" x="${pcx}" y="${pcy - R - 20}" text-anchor="middle" font-size="16" fill="#000000">Setor: ${pct.toFixed(0)}% (${Math.min(travel, cfg.sector).toFixed(0)}°/${cfg.sector}°)</text>
+    <text class="lbl-title" x="${pcx}" y="${pcy + R + 20}" text-anchor="middle" font-size="13" fill="var(--foreground)">PIVÔ CENTRAL</text>
+    <text class="lbl-sub" x="${pcx}" y="${pcy + R + 37}" text-anchor="middle" font-size="11" fill="${status.color}">${status.text}</text>
+  </g>
+
+  ${tx ? packet(hopPath, sig, HOP_MIN_LABEL[s.signalType] || "", cfg.hop) : ""}
+  `;
+
+  document.getElementById("start-pivot").disabled = s.pivotState === "running";
+  document.getElementById("stop-pivot").disabled = s.pivotState !== "running";
+  document.getElementById("emergency").disabled = s.pivotState !== "running";
+}
+
+// atualização leve: gira o braço e atualiza o rótulo de progresso, sem recriar os pacotes de rádio
+function updateDynamic() {
+  const armOuter = document.getElementById("arm-line-outer");
+  if (!armOuter) { render(); return; }
+  const rad = s.theta * Math.PI / 180;
+  const tipX = pcx + R * Math.cos(rad), tipY = pcy + R * Math.sin(rad);
+
+  armOuter.setAttribute("x2", tipX); armOuter.setAttribute("y2", tipY);
+  const armFlow = document.getElementById("arm-line-flow");
+  if (armFlow) { armFlow.setAttribute("x2", tipX); armFlow.setAttribute("y2", tipY); }
+
+  towerFracs.forEach((f, i) => {
+    const g = document.getElementById("tower-" + i);
+    if (g) { const p = polar(pcx, pcy, R * f, s.theta); g.setAttribute("transform", `translate(${p.x} ${p.y})`); }
+  });
+
+  const tipG = document.getElementById("tip-group");
+  if (tipG) tipG.setAttribute("transform", `translate(${tipX} ${tipY})`);
+
+  const travel = Math.max(0, s.theta - s.startTheta);
+  const pct = Math.min(100, (travel / cfg.sector) * 100);
+  const lbl = document.getElementById("progress-label");
+  if (lbl) lbl.textContent = `Setor: ${pct.toFixed(0)}% (${Math.min(travel, cfg.sector).toFixed(0)}°/${cfg.sector}°)`;
+}
+
+/* ---------------- Controles ---------------- */
+const toggleBtn = document.getElementById("toggle");
+toggleBtn.addEventListener("click", () => {
+  running = !running;
+  toggleBtn.textContent = running ? "Pausar" : "Iniciar";
+});
+document.getElementById("reset").addEventListener("click", () => { s = initialState(); lastPhaseStart = -1; render(); });
+document.getElementById("start-pivot").addEventListener("click", () => { startPivot(); render(); });
+document.getElementById("stop-pivot").addEventListener("click", () => { stopPivot("manual"); render(); });
+document.getElementById("emergency").addEventListener("click", () => { stopPivot("emergencia"); render(); });
+
+/* ---------------- Loop ---------------- */
+let lastPhaseStart = -1;
+setInterval(() => {
+  if (!running) return;
+  const before = s.phase;
+  tick(0.1);
+  // redesenha ao iniciar uma transmissão (novos pacotes) e ao terminá-la (troca de estado da bomba)
+  if (s.phase === "tx" && (before !== "tx" || s.phaseStart !== lastPhaseStart)) {
+    lastPhaseStart = s.phaseStart;
+    render();
+  } else if (before === "tx" && s.phase !== "tx") {
+    render();
+  } else {
+    updateDynamic();
+  }
+}, 100);
+
+render();
+</script>
+</body>
+</html>
