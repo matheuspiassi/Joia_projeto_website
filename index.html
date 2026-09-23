@@ -1,869 +1,2604 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Jóia Distribuidora — Automação e Telemetria LoRa/4G para Poço e Reservatório</title>
-<meta name="description" content="Módulos de telemetria via rádio LoRa e 4G para monitorar níveis e controlar bombas de poço e reservatório à distância, em tempo real. Jóia Distribuidora — JOB. MANFRIN MEI." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-<style>
-  :root {
-    --background: #faf8f5;
-    --foreground: #262324;
-    --card: #ffffff;
-    --primary: #0098da;
-    --primary-foreground: #ffffff;
-    --secondary: #efe8dc;
-    --secondary-foreground: #4a4442;
-    --muted: #f2ede4;
-    --muted-foreground: #756e6b;
-    --destructive: oklch(0.58 0.22 25);
-    --destructive-deep: oklch(0.46 0.21 24);
-    --border: #e7e0d3;
-    --water: oklch(0.6 0.18 220);
-    --water-deep: oklch(0.42 0.19 235);
-    --signal: oklch(0.72 0.18 68);
-    --signal-deep: oklch(0.5 0.18 68);
-    --pump-on: oklch(0.68 0.19 148);
-    --pump-on-deep: oklch(0.48 0.18 148);
-    --pump-off: oklch(0.6 0.03 255);
-    --ground: oklch(0.75 0.1 140);
-    --ground-deep: oklch(0.63 0.12 138);
-    --steel: oklch(0.5 0.045 250);
-    --steel-dark: oklch(0.3 0.045 252);
-    --sky: oklch(0.92 0.04 235);
-    --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jóia Distribuidora — Automação e Telemetria LoRa/4G para Poço e Reservatório</title>
+  <meta name="description"
+    content="Módulos de telemetria via rádio LoRa e 4G para monitorar níveis e controlar bombas de poço e reservatório à distância, em tempo real. Jóia Distribuidora — JOB. MANFRIN MEI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --background: #faf8f5;
+      --foreground: #262324;
+      --card: #ffffff;
+      --primary: #0098da;
+      --primary-foreground: #ffffff;
+      --secondary: #efe8dc;
+      --secondary-foreground: #4a4442;
+      --muted: #f2ede4;
+      --muted-foreground: #756e6b;
+      --destructive: oklch(0.58 0.22 25);
+      --destructive-deep: oklch(0.46 0.21 24);
+      --border: #e7e0d3;
+      --water: oklch(0.6 0.18 220);
+      --water-deep: oklch(0.42 0.19 235);
+      --signal: oklch(0.72 0.18 68);
+      --signal-deep: oklch(0.5 0.18 68);
+      --pump-on: oklch(0.68 0.19 148);
+      --pump-on-deep: oklch(0.48 0.18 148);
+      --pump-off: oklch(0.6 0.03 255);
+      --ground: oklch(0.75 0.1 140);
+      --ground-deep: oklch(0.63 0.12 138);
+      --steel: oklch(0.5 0.045 250);
+      --steel-dark: oklch(0.3 0.045 252);
+      --sky: oklch(0.92 0.04 235);
+      --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-    /* identidade Jóia Distribuidora, extraída das artes reais dos produtos */
-    --brand-dark: #2b2829;
-    --brand-dark-deep: #1c1a1b;
-    --brand-on-dark: #f4efe7;
-    --brand-on-dark-muted: #cbc2b8;
-    --brand-gold: #d2ae6d;
-    --brand-gold-deep: #b8924f;
-    --brand-blue: #0098da;
-    --brand-blue-deep: #0077ad;
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    background: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    min-height: 100vh;
-  }
-  img { max-width: 100%; }
-  .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
-  section[id] { scroll-margin-top: 84px; }
+      /* identidade Jóia Distribuidora, extraída das artes reais dos produtos */
+      --brand-dark: #2b2829;
+      --brand-dark-deep: #1c1a1b;
+      --brand-on-dark: #f4efe7;
+      --brand-on-dark-muted: #cbc2b8;
+      --brand-gold: #d2ae6d;
+      --brand-gold-deep: #b8924f;
+      --brand-blue: #0098da;
+      --brand-blue-deep: #0077ad;
+    }
 
-  /* ---------- tipografia utilitária ---------- */
-  .kicker { font-family: var(--font-mono); font-size: .75rem; text-transform: uppercase; letter-spacing: .25em; color: var(--primary); margin: 0; }
-  .kicker.on-dark { color: var(--brand-gold); }
-  .lead { margin: .75rem 0 0; max-width: 40rem; font-size: 1rem; line-height: 1.6; color: var(--muted-foreground); }
-  .lead.on-dark { color: var(--brand-on-dark-muted); }
-  .section-head { max-width: 42rem; }
-  .section-head h2 { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem); letter-spacing: -.01em; margin: .6rem 0 0; line-height: 1.15; }
-  .section-head.center { margin: 0 auto; text-align: center; }
+    * {
+      box-sizing: border-box;
+    }
 
-  /* ---------- botões ---------- */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-    font: 600 .9rem var(--font-sans); cursor: pointer; border-radius: .6rem; text-decoration: none;
-    padding: .75rem 1.4rem; border: 1px solid transparent; transition: filter .15s, background .15s, transform .15s;
-    white-space: nowrap;
-  }
-  .btn:hover { transform: translateY(-1px); }
-  .btn-gold { background: var(--brand-gold); color: var(--brand-dark-deep); }
-  .btn-gold:hover { filter: brightness(1.06); }
-  .btn-outline-dark { background: transparent; color: var(--brand-on-dark); border-color: rgba(244,239,231,.35); }
-  .btn-outline-dark:hover { background: rgba(244,239,231,.08); }
-  .btn-primary { background: var(--primary); color: var(--primary-foreground); }
-  .btn-primary:hover { filter: brightness(1.08); }
-  .btn-outline { background: transparent; color: var(--foreground); border-color: var(--border); }
-  .btn-outline:hover { background: var(--muted); }
-  .btn-sm { padding: .5rem 1rem; font-size: .8rem; border-radius: .5rem; }
-  .btn svg { width: 1.05em; height: 1.05em; flex: none; }
+    html {
+      scroll-behavior: smooth;
+    }
 
-  button {
-    font: 600 .875rem var(--font-sans); cursor: pointer; border-radius: .375rem;
-    padding: .55rem 1rem; border: 1px solid transparent; transition: filter .15s, background .15s;
-  }
-  #toggle { background: var(--primary); color: var(--primary-foreground); }
-  #toggle:hover { filter: brightness(1.1); }
-  #reset { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--border); }
-  #reset:hover { background: var(--muted); }
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+    }
 
-  .panel { border: 1px solid var(--border); background: var(--card); border-radius: .75rem; }
-  .diagram { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; box-shadow: 0 10px 25px -12px rgba(15, 40, 80, .25); }
-  .config { margin-top: 1.5rem; padding: 1.25rem; }
-  .config h2 { font: 400 .75rem var(--font-mono); text-transform: uppercase; letter-spacing: .2em; color: var(--muted-foreground); margin: 0; }
-  .cfg-grid { display: grid; gap: 1.25rem; margin-top: 1rem; }
-  @media (min-width: 640px) { .cfg-grid { grid-template-columns: 1fr 1fr; } }
-  label { display: block; font-size: .875rem; }
-  .row { display: flex; align-items: center; justify-content: space-between; }
-  .val { font-family: var(--font-mono); color: var(--muted-foreground); }
-  input[type=range] { width: 100%; margin-top: .5rem; }
-  #svg { display: block; width: 100%; min-width: 820px; height: auto; }
+    img {
+      max-width: 100%;
+    }
 
-  @keyframes ping-ring { 0% { transform: scale(.6); opacity: .9 } 100% { transform: scale(2.2); opacity: 0 } }
-  @keyframes flow { to { stroke-dashoffset: -24 } }
-  @keyframes blink { to { opacity: .3 } }
-  @keyframes cloud-pop {
-    0% { opacity: 0; transform: translateY(6px) scale(.8); }
-    18% { opacity: 1; transform: translateY(0) scale(1); }
-    78% { opacity: 1; transform: translateY(-2px) scale(1); }
-    100% { opacity: 0; transform: translateY(-10px) scale(.92); }
-  }
-  .ping-ring { animation: ping-ring 1.2s ease-out infinite; transform-box: view-box; }
-  .flow { animation: flow .6s linear infinite; }
-  .blink { animation: blink .8s steps(2) infinite; }
-  .cloud-publish { animation: cloud-pop 1.2s ease-out forwards; transform-box: fill-box; transform-origin: center; }
-  .lbl-title { font-family: var(--font-sans); font-weight: 700; letter-spacing: .09em; }
-  .lbl-sub { font-family: var(--font-mono); font-weight: 700; }
+    .wrap {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
 
-  /* ---------- cabeçalho / toolbar ---------- */
-  .site-header {
-    position: sticky; top: 0; z-index: 50; background: var(--brand-dark);
-    border-bottom: 1px solid rgba(244,239,231,.1);
-  }
-  .nav { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: .7rem 1.25rem; }
-  .brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
-  .brand img { height: 40px; width: auto; display: block; border-radius: .3rem; }
-  .nav-links { display: flex; align-items: center; gap: 1.75rem; list-style: none; margin: 0; padding: 0; }
-  .nav-links a { color: var(--brand-on-dark-muted); text-decoration: none; font-size: .875rem; font-weight: 500; transition: color .15s; }
-  .nav-links a:hover { color: var(--brand-gold); }
-  .nav-cta { display: flex; align-items: center; gap: .75rem; }
-  .phone-chip { display: inline-flex; align-items: center; gap: .45rem; color: var(--brand-on-dark); text-decoration: none; font-family: var(--font-mono); font-size: .85rem; }
-  .phone-chip svg { width: 1rem; height: 1rem; color: var(--brand-gold); flex: none; }
-  .nav-toggle {
-    display: none; background: none; border: 1px solid rgba(244,239,231,.25); color: var(--brand-on-dark);
-    width: 2.25rem; height: 2.25rem; border-radius: .5rem; padding: 0; align-items: center; justify-content: center;
-  }
-  .nav-toggle svg { width: 1.2rem; height: 1.2rem; }
-  .nav-links-phone { display: none; }
-  @media (max-width: 1180px) {
-    .nav-links { position: absolute; left: 0; right: 0; top: 100%; background: var(--brand-dark); flex-direction: column;
-      align-items: flex-start; gap: 0; padding: .5rem 1.25rem 1rem; border-bottom: 1px solid rgba(244,239,231,.1); display: none; }
-    .nav-links.open { display: flex; }
-    .nav-links a { padding: .65rem 0; width: 100%; border-bottom: 1px solid rgba(244,239,231,.06); }
-    .nav-links-phone { display: block; }
-    .nav-links-phone a { color: var(--brand-gold); font-family: var(--font-mono); border-bottom: none; }
-    .nav-cta .phone-chip { display: none; }
-    .nav-toggle { display: inline-flex; }
-  }
-  @media (max-width: 400px) {
-    .nav { padding: .6rem .75rem; gap: .5rem; }
-    .nav-cta { gap: .5rem; }
-    .brand img { height: 34px; }
-    .nav-cta .btn-sm { padding: .5rem .7rem; font-size: .75rem; }
-  }
+    section[id] {
+      scroll-margin-top: 84px;
+    }
 
-  /* ---------- hero ---------- */
-  .hero { background: radial-gradient(120% 140% at 85% -10%, #3a3536 0%, var(--brand-dark) 55%, var(--brand-dark-deep) 100%); color: var(--brand-on-dark); position: relative; overflow: hidden; }
-  .hero .wrap { padding: 4.5rem 1.25rem 4rem; }
-  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 3rem; align-items: center; }
-  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 2.5rem; } }
-  .hero h1 { font-size: clamp(2rem, 1.3rem + 3vw, 3.25rem); line-height: 1.08; letter-spacing: -.02em; margin: .75rem 0 0; }
-  .hero h1 em { font-style: normal; color: var(--brand-gold); }
-  .hero-cta { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
-  .hero-art { position: relative; display: flex; justify-content: center; }
-  .hero-art img { max-height: 480px; width: auto; filter: drop-shadow(0 30px 45px rgba(0,0,0,.45)); }
-  .sparkle { position: absolute; color: var(--brand-gold); opacity: .55; }
-  .spark-1 { top: 6%; left: 8%; width: 22px; height: 22px; }
-  .spark-2 { bottom: 10%; right: 4%; width: 16px; height: 16px; }
-  .spark-3 { top: 45%; right: 12%; width: 12px; height: 12px; opacity: .35; }
+    /* ---------- tipografia utilitária ---------- */
+    .kicker {
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .25em;
+      color: var(--primary);
+      margin: 0;
+    }
 
-  /* ---------- faixa de especificações ---------- */
-  .trust-strip { background: var(--card); border-bottom: 1px solid var(--border); }
-  .trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 760px) { .trust-grid { grid-template-columns: repeat(2, 1fr); } }
-  .trust-item { display: flex; align-items: center; gap: .65rem; padding: 1.15rem 1.25rem; border-left: 1px solid var(--border); }
-  .trust-grid .trust-item:nth-child(1) { border-left: none; }
-  @media (max-width: 760px) { .trust-grid .trust-item:nth-child(2n+1) { border-left: none; } .trust-item { border-top: 1px solid var(--border); } .trust-grid .trust-item:nth-child(-n+2) { border-top: none; } }
-  .trust-item svg { width: 1.35rem; height: 1.35rem; color: var(--brand-blue); flex: none; }
-  .trust-item span { font-size: .8rem; font-weight: 600; line-height: 1.3; }
+    .kicker.on-dark {
+      color: var(--brand-gold);
+    }
 
-  /* ---------- seções claras genéricas ---------- */
-  .section { padding: 4.5rem 0; }
-  .section.tight { padding: 3.5rem 0; }
-  .section-muted { background: var(--muted); }
+    .lead {
+      margin: .75rem 0 0;
+      max-width: 40rem;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--muted-foreground);
+    }
 
-  /* ---------- benefícios ---------- */
-  .benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2.75rem; }
-  @media (max-width: 860px) { .benefits-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .benefits-grid { grid-template-columns: 1fr; } }
-  .benefit-card { background: var(--card); border: 1px solid var(--border); border-radius: .9rem; padding: 1.5rem; }
-  .icon-badge { width: 2.75rem; height: 2.75rem; border-radius: .65rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; flex: none; }
-  .icon-badge.gold { background: rgba(210,174,109,.16); color: var(--brand-gold-deep); }
-  .icon-badge.blue { background: rgba(0,152,218,.12); color: var(--brand-blue-deep); }
-  .icon-badge svg { width: 1.4rem; height: 1.4rem; }
-  .icon-badge.sm { width: 2.25rem; height: 2.25rem; margin-bottom: 0; }
-  .icon-badge.sm svg { width: 1.15rem; height: 1.15rem; }
-  .benefit-card h3 { font-size: 1rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
-  .benefit-card p { margin: 0; font-size: .875rem; line-height: 1.55; color: var(--muted-foreground); }
+    .lead.on-dark {
+      color: var(--brand-on-dark-muted);
+    }
 
-  /* ---------- produtos (slider) ---------- */
-  .products-slider { margin-top: 2.75rem; }
-  .products-track {
-    display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
-    padding: .25rem .25rem 1rem; margin: -.25rem -.25rem -1rem; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  }
-  .products-track::-webkit-scrollbar { display: none; }
-  .products-track .product-card { scroll-snap-align: start; flex: 0 0 auto; width: calc((100% - 2 * 1.5rem) / 3); }
-  @media (max-width: 980px) { .products-track .product-card { width: calc((100% - 1.5rem) / 2); } }
-  @media (max-width: 640px) { .products-track .product-card { width: 82%; } }
-  .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; overflow: hidden; display: flex; flex-direction: column; }
-  .product-media { background: linear-gradient(180deg, var(--muted), var(--card) 70%); display: flex; align-items: center; justify-content: center; padding: 1.75rem 1.25rem .5rem; }
-  .product-media img { height: 280px; width: auto; filter: drop-shadow(0 16px 20px rgba(30,25,20,.18)); }
-  .product-body { padding: 1.5rem; display: flex; flex-direction: column; gap: .75rem; flex: 1; }
-  .product-eyebrow { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--brand-blue-deep); margin: 0; }
-  .product-body h3 { margin: 0; font-size: 1.15rem; letter-spacing: -.01em; }
-  .product-body p { margin: 0; font-size: .875rem; line-height: 1.55; color: var(--muted-foreground); flex: 1; }
-  .chip-row { display: flex; flex-wrap: wrap; gap: .4rem; }
-  .spec-chip { font-family: var(--font-mono); font-size: .7rem; padding: .3rem .55rem; border-radius: 999px; background: var(--muted); color: var(--secondary-foreground); border: 1px solid var(--border); }
-  .product-body .btn { margin-top: .35rem; align-self: flex-start; }
+    .section-head {
+      max-width: 42rem;
+    }
 
-  .slider-controls { display: flex; align-items: center; justify-content: center; gap: 1.25rem; margin-top: 1.5rem; }
-  .slider-arrow {
-    width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid var(--border); background: var(--card);
-    color: var(--foreground); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
-    transition: background .15s, transform .15s;
-  }
-  .slider-arrow:hover { background: var(--muted); transform: translateY(-1px); }
-  .slider-arrow svg { width: 1.1rem; height: 1.1rem; }
-  .slider-dots { display: flex; align-items: center; gap: .45rem; }
-  .slider-dots button { width: .5rem; height: .5rem; padding: 0; border: none; border-radius: 999px; background: var(--border); cursor: pointer; transition: width .2s, background .2s; }
-  .slider-dots button.active { width: 1.35rem; background: var(--brand-blue); }
+    .section-head h2 {
+      font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem);
+      letter-spacing: -.01em;
+      margin: .6rem 0 0;
+      line-height: 1.15;
+    }
 
-  /* ---------- instalação e conectividade ---------- */
-  .install-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 3rem; align-items: center; margin-top: 2.75rem; }
-  @media (max-width: 780px) { .install-grid { grid-template-columns: 1fr; gap: 2rem; } }
-  .install-photo { margin: 0; }
-  .install-photo img { width: 100%; height: auto; display: block; border-radius: 1rem; border: 1px solid var(--border); box-shadow: 0 25px 45px -24px rgba(20,15,10,.35); }
-  .install-photo figcaption { margin-top: .65rem; font-size: .8rem; color: var(--muted-foreground); text-align: center; }
-  .install-options { display: flex; flex-direction: column; gap: 2rem; }
-  .install-option h3 { margin: 0 0 .4rem; font-size: 1.05rem; letter-spacing: -.01em; }
-  .install-option p { margin: 0; font-size: .875rem; line-height: 1.6; color: var(--muted-foreground); }
+    .section-head.center {
+      margin: 0 auto;
+      text-align: center;
+    }
 
-  /* ---------- página de configuração do equipamento ---------- */
-  .config-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 3rem; align-items: center; margin-top: 2.75rem; }
-  @media (max-width: 780px) { .config-grid { grid-template-columns: 1fr; gap: 2rem; } }
-  .config-shots { display: flex; gap: 1.25rem; }
-  .config-shots .shot { margin: 0; flex: 1; min-width: 0; }
-  .config-shots img { width: 100%; height: auto; display: block; border-radius: .9rem; border: 1px solid var(--border); box-shadow: 0 20px 40px -22px rgba(20,15,10,.3); }
-  .config-shots figcaption { margin-top: .6rem; font-size: .78rem; color: var(--muted-foreground); text-align: center; }
-  .config-options { display: flex; flex-direction: column; gap: 1.75rem; }
+    /* ---------- botões ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      font: 600 .9rem var(--font-sans);
+      cursor: pointer;
+      border-radius: .6rem;
+      text-decoration: none;
+      padding: .75rem 1.4rem;
+      border: 1px solid transparent;
+      transition: filter .15s, background .15s, transform .15s;
+      white-space: nowrap;
+    }
 
-  /* ---------- plataforma de monitoramento ---------- */
-  .platform-intro { display: grid; grid-template-columns: .8fr 1.2fr; gap: 3rem; align-items: center; margin-top: 2.75rem; }
-  @media (max-width: 780px) { .platform-intro { grid-template-columns: 1fr; gap: 2rem; } }
-  .platform-probe-card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.25rem; }
-  .platform-probe-card img { width: 100%; height: auto; display: block; border-radius: .6rem; }
-  .platform-intro h3 { margin: 0; font-size: 1.15rem; letter-spacing: -.01em; }
-  .platform-list { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 1.25rem; }
-  .platform-list li { display: flex; align-items: flex-start; gap: .9rem; }
-  .platform-list strong { display: block; font-size: .9rem; margin-bottom: .2rem; }
-  .platform-list span { font-size: .8rem; line-height: 1.5; color: var(--muted-foreground); }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
 
-  .platform-shots { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; margin-top: 3.5rem; align-items: start; }
-  @media (max-width: 780px) { .platform-shots { grid-template-columns: 1fr; } }
-  .shot { margin: 0; }
-  .shot img { width: 100%; height: auto; display: block; border-radius: .75rem; border: 1px solid var(--border); box-shadow: 0 25px 45px -24px rgba(20,15,10,.35); }
-  .shot figcaption { margin-top: .65rem; font-size: .8rem; color: var(--muted-foreground); text-align: center; }
+    .btn-gold {
+      background: var(--brand-gold);
+      color: var(--brand-dark-deep);
+    }
 
-  /* ---------- simulação ---------- */
-  .simulation-section { background: var(--background); }
-  .sim-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+    .btn-gold:hover {
+      filter: brightness(1.06);
+    }
 
-  /* ---------- CTA final ---------- */
-  .final-cta { background: var(--brand-dark); color: var(--brand-on-dark); text-align: center; position: relative; overflow: hidden; }
-  .final-cta .wrap { padding: 4rem 1.25rem; position: relative; z-index: 1; }
-  .final-cta h2 { font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.5rem); margin: .75rem auto 0; max-width: 38rem; letter-spacing: -.01em; }
-  .final-cta .lead { margin: 1rem auto 0; text-align: center; }
-  .final-cta .hero-cta { justify-content: center; }
+    .btn-outline-dark {
+      background: transparent;
+      color: var(--brand-on-dark);
+      border-color: rgba(244, 239, 231, .35);
+    }
 
-  /* ---------- rodapé ---------- */
-  .site-footer { background: var(--brand-dark-deep); color: var(--brand-on-dark-muted); }
-  .footer-grid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2rem; padding: 3rem 1.25rem 2rem; }
-  .footer-brand { display: flex; align-items: center; gap: .75rem; }
-  .footer-brand img { height: 44px; width: auto; border-radius: .3rem; }
-  .footer-brand div strong { display: block; color: var(--brand-on-dark); font-size: .95rem; }
-  .footer-brand div span { font-size: .8rem; }
-  .footer-links { display: flex; flex-wrap: wrap; gap: .5rem 2.5rem; }
-  .footer-col h4 { margin: 0 0 .7rem; font-size: .75rem; text-transform: uppercase; letter-spacing: .15em; color: var(--brand-gold); }
-  .footer-col a, .footer-col p { display: block; color: var(--brand-on-dark-muted); text-decoration: none; font-size: .85rem; margin: 0 0 .5rem; }
-  .footer-col a:hover { color: var(--brand-on-dark); }
-  .footer-bottom { border-top: 1px solid rgba(244,239,231,.1); padding: 1.1rem 1.25rem; text-align: center; font-size: .75rem; }
-</style>
+    .btn-outline-dark:hover {
+      background: rgba(244, 239, 231, .08);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--foreground);
+      border-color: var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--muted);
+    }
+
+    .btn-sm {
+      padding: .5rem 1rem;
+      font-size: .8rem;
+      border-radius: .5rem;
+    }
+
+    .btn svg {
+      width: 1.05em;
+      height: 1.05em;
+      flex: none;
+    }
+
+    button {
+      font: 600 .875rem var(--font-sans);
+      cursor: pointer;
+      border-radius: .375rem;
+      padding: .55rem 1rem;
+      border: 1px solid transparent;
+      transition: filter .15s, background .15s;
+    }
+
+    #toggle {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    #toggle:hover {
+      filter: brightness(1.1);
+    }
+
+    #reset {
+      background: var(--secondary);
+      color: var(--secondary-foreground);
+      border-color: var(--border);
+    }
+
+    #reset:hover {
+      background: var(--muted);
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: .75rem;
+    }
+
+    .diagram {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 10px 25px -12px rgba(15, 40, 80, .25);
+    }
+
+    .config {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+    }
+
+    .config h2 {
+      font: 400 .75rem var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      color: var(--muted-foreground);
+      margin: 0;
+    }
+
+    .cfg-grid {
+      display: grid;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .cfg-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: .875rem;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .val {
+      font-family: var(--font-mono);
+      color: var(--muted-foreground);
+    }
+
+    input[type=range] {
+      width: 100%;
+      margin-top: .5rem;
+    }
+
+    #svg {
+      display: block;
+      width: 100%;
+      min-width: 820px;
+      height: auto;
+    }
+
+    @keyframes ping-ring {
+      0% {
+        transform: scale(.6);
+        opacity: .9
+      }
+
+      100% {
+        transform: scale(2.2);
+        opacity: 0
+      }
+    }
+
+    @keyframes flow {
+      to {
+        stroke-dashoffset: -24
+      }
+    }
+
+    @keyframes blink {
+      to {
+        opacity: .3
+      }
+    }
+
+    @keyframes cloud-pop {
+      0% {
+        opacity: 0;
+        transform: translateY(6px) scale(.8);
+      }
+
+      18% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      78% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-10px) scale(.92);
+      }
+    }
+
+    .ping-ring {
+      animation: ping-ring 1.2s ease-out infinite;
+      transform-box: view-box;
+    }
+
+    .flow {
+      animation: flow .6s linear infinite;
+    }
+
+    .blink {
+      animation: blink .8s steps(2) infinite;
+    }
+
+    .cloud-publish {
+      animation: cloud-pop 1.2s ease-out forwards;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .lbl-title {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      letter-spacing: .09em;
+    }
+
+    .lbl-sub {
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    /* ---------- cabeçalho / toolbar ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--brand-dark);
+      border-bottom: 1px solid rgba(244, 239, 231, .1);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: .7rem 1.25rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      text-decoration: none;
+    }
+
+    .brand img {
+      height: 40px;
+      width: auto;
+      display: block;
+      border-radius: .3rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      color: var(--brand-on-dark-muted);
+      text-decoration: none;
+      font-size: .875rem;
+      font-weight: 500;
+      transition: color .15s;
+    }
+
+    .nav-links a:hover {
+      color: var(--brand-gold);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .phone-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      color: var(--brand-on-dark);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: .85rem;
+    }
+
+    .phone-chip svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--brand-gold);
+      flex: none;
+    }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: 1px solid rgba(244, 239, 231, .25);
+      color: var(--brand-on-dark);
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: .5rem;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-toggle svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    .nav-links-phone {
+      display: none;
+    }
+
+    @media (max-width: 1180px) {
+      .nav-links {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        background: var(--brand-dark);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        padding: .5rem 1.25rem 1rem;
+        border-bottom: 1px solid rgba(244, 239, 231, .1);
+        display: none;
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .nav-links a {
+        padding: .65rem 0;
+        width: 100%;
+        border-bottom: 1px solid rgba(244, 239, 231, .06);
+      }
+
+      .nav-links-phone {
+        display: block;
+      }
+
+      .nav-links-phone a {
+        color: var(--brand-gold);
+        font-family: var(--font-mono);
+        border-bottom: none;
+      }
+
+      .nav-cta .phone-chip {
+        display: none;
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .nav {
+        padding: .6rem .75rem;
+        gap: .5rem;
+      }
+
+      .nav-cta {
+        gap: .5rem;
+      }
+
+      .brand img {
+        height: 34px;
+      }
+
+      .nav-cta .btn-sm {
+        padding: .5rem .7rem;
+        font-size: .75rem;
+      }
+    }
+
+    /* ---------- hero ---------- */
+    .hero {
+      background: radial-gradient(120% 140% at 85% -10%, #3a3536 0%, var(--brand-dark) 55%, var(--brand-dark-deep) 100%);
+      color: var(--brand-on-dark);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero .wrap {
+      padding: 4.5rem 1.25rem 4rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 1.3rem + 3vw, 3.25rem);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      margin: .75rem 0 0;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--brand-gold);
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-top: 2rem;
+    }
+
+    .hero-art {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .hero-art img {
+      max-height: 480px;
+      width: auto;
+      filter: drop-shadow(0 30px 45px rgba(0, 0, 0, .45));
+    }
+
+    .sparkle {
+      position: absolute;
+      color: var(--brand-gold);
+      opacity: .55;
+    }
+
+    .spark-1 {
+      top: 6%;
+      left: 8%;
+      width: 22px;
+      height: 22px;
+    }
+
+    .spark-2 {
+      bottom: 10%;
+      right: 4%;
+      width: 16px;
+      height: 16px;
+    }
+
+    .spark-3 {
+      top: 45%;
+      right: 12%;
+      width: 12px;
+      height: 12px;
+      opacity: .35;
+    }
+
+    /* ---------- faixa de especificações ---------- */
+    .trust-strip {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 760px) {
+      .trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: 1.15rem 1.25rem;
+      border-left: 1px solid var(--border);
+    }
+
+    .trust-grid .trust-item:nth-child(1) {
+      border-left: none;
+    }
+
+    @media (max-width: 760px) {
+      .trust-grid .trust-item:nth-child(2n+1) {
+        border-left: none;
+      }
+
+      .trust-item {
+        border-top: 1px solid var(--border);
+      }
+
+      .trust-grid .trust-item:nth-child(-n+2) {
+        border-top: none;
+      }
+    }
+
+    .trust-item svg {
+      width: 1.35rem;
+      height: 1.35rem;
+      color: var(--brand-blue);
+      flex: none;
+    }
+
+    .trust-item span {
+      font-size: .8rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    /* ---------- seções claras genéricas ---------- */
+    .section {
+      padding: 4.5rem 0;
+    }
+
+    .section.tight {
+      padding: 3.5rem 0;
+    }
+
+    .section-muted {
+      background: var(--muted);
+    }
+
+    /* ---------- benefícios ---------- */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2.75rem;
+    }
+
+    @media (max-width: 860px) {
+      .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .benefits-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .benefit-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: .9rem;
+      padding: 1.5rem;
+    }
+
+    .icon-badge {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: .65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      flex: none;
+    }
+
+    .icon-badge.gold {
+      background: rgba(210, 174, 109, .16);
+      color: var(--brand-gold-deep);
+    }
+
+    .icon-badge.blue {
+      background: rgba(0, 152, 218, .12);
+      color: var(--brand-blue-deep);
+    }
+
+    .icon-badge svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    .icon-badge.sm {
+      width: 2.25rem;
+      height: 2.25rem;
+      margin-bottom: 0;
+    }
+
+    .icon-badge.sm svg {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+
+    .benefit-card h3 {
+      font-size: 1rem;
+      margin: 0 0 .4rem;
+      letter-spacing: -.01em;
+    }
+
+    .benefit-card p {
+      margin: 0;
+      font-size: .875rem;
+      line-height: 1.55;
+      color: var(--muted-foreground);
+    }
+
+    /* ---------- produtos (slider) ---------- */
+    .products-slider {
+      margin-top: 2.75rem;
+    }
+
+    .products-track {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      padding: .25rem .25rem 1rem;
+      margin: -.25rem -.25rem -1rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .products-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .products-track .product-card {
+      scroll-snap-align: start;
+      flex: 0 0 auto;
+      width: calc((100% - 2 * 1.5rem) / 3);
+    }
+
+    @media (max-width: 980px) {
+      .products-track .product-card {
+        width: calc((100% - 1.5rem) / 2);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .products-track .product-card {
+        width: 82%;
+      }
+    }
+
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-media {
+      background: linear-gradient(180deg, var(--muted), var(--card) 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.75rem 1.25rem .5rem;
+    }
+
+    .product-media img {
+      height: 280px;
+      width: auto;
+      filter: drop-shadow(0 16px 20px rgba(30, 25, 20, .18));
+    }
+
+    .product-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      flex: 1;
+    }
+
+    .product-eyebrow {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--brand-blue-deep);
+      margin: 0;
+    }
+
+    .product-body h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: -.01em;
+    }
+
+    .product-body p {
+      margin: 0;
+      font-size: .875rem;
+      line-height: 1.55;
+      color: var(--muted-foreground);
+      flex: 1;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+    }
+
+    .spec-chip {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      padding: .3rem .55rem;
+      border-radius: 999px;
+      background: var(--muted);
+      color: var(--secondary-foreground);
+      border: 1px solid var(--border);
+    }
+
+    .product-actions {
+      margin-top: .35rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .5rem .75rem;
+    }
+
+    .btn-usecase {
+      background: none;
+      border: none;
+      padding: 0;
+      font: 600 .8125rem var(--font-sans);
+      color: var(--brand-blue-deep);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: .2em;
+      text-decoration-color: transparent;
+      transition: text-decoration-color .15s;
+    }
+
+    .btn-usecase:hover {
+      text-decoration-color: currentColor;
+    }
+
+    .slider-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .slider-arrow {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--foreground);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: background .15s, transform .15s;
+    }
+
+    .slider-arrow:hover {
+      background: var(--muted);
+      transform: translateY(-1px);
+    }
+
+    .slider-arrow svg {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+
+    .slider-dots {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+    }
+
+    .slider-dots button {
+      width: .5rem;
+      height: .5rem;
+      padding: 0;
+      border: none;
+      border-radius: 999px;
+      background: var(--border);
+      cursor: pointer;
+      transition: width .2s, background .2s;
+    }
+
+    .slider-dots button.active {
+      width: 1.35rem;
+      background: var(--brand-blue);
+    }
+
+    /* ---------- popup "como usar?" ---------- */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 17, 16, .6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .usecase-modal {
+      display: none;
+      background: var(--card);
+      border-radius: 1rem;
+      max-width: 34rem;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 2rem 1.75rem 1.75rem;
+      position: relative;
+      box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .4);
+    }
+
+    .usecase-modal.open {
+      display: block;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: .9rem;
+      right: .9rem;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--muted);
+      color: var(--foreground);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .modal-close svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .usecase-modal h3 {
+      margin: .4rem 2.2rem .25rem 0;
+      font-size: 1.3rem;
+      letter-spacing: -.01em;
+    }
+
+    .usecase-modal>p.lead {
+      margin: 0 0 .25rem;
+      font-size: .875rem;
+    }
+
+    .flow-block {
+      margin: 1.5rem 0;
+    }
+
+    .flow-row-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--brand-blue-deep);
+      margin: 0 0 .6rem;
+      text-align: center;
+    }
+
+    .usecase-flow {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: .25rem .4rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .usecase-flow:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .4rem;
+      width: 5.75rem;
+    }
+
+    .flow-node img {
+      width: 3.25rem;
+      max-height: 3.25rem;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 8px rgba(20, 15, 10, .18));
+    }
+
+    .flow-node .flow-icon {
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: .7rem;
+      background: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand-blue-deep);
+      flex: none;
+    }
+
+    .flow-node .flow-icon svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .flow-node .flow-icon img {
+      width: 1.7rem;
+      height: 1.7rem;
+      object-fit: contain;
+    }
+
+    .flow-node span {
+      font-size: .72rem;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    .flow-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .25rem;
+      color: var(--brand-gold-deep);
+      padding-top: 1rem;
+      flex: 0 1 4.5rem;
+    }
+
+    .flow-link svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    .flow-link small {
+      font-size: .64rem;
+      font-family: var(--font-mono);
+      text-align: center;
+      line-height: 1.2;
+      color: var(--muted-foreground);
+    }
+
+    .usecase-modal .note {
+      margin-top: 1.25rem;
+      padding: .85rem 1rem;
+      background: var(--muted);
+      border-radius: .6rem;
+      font-size: .8rem;
+      color: var(--secondary-foreground);
+    }
+
+    .usecase-modal .note strong {
+      color: var(--foreground);
+    }
+
+    @media (max-width: 480px) {
+      .flow-node {
+        width: 4.6rem;
+      }
+
+      .flow-node img,
+      .flow-node .flow-icon {
+        width: 2.6rem;
+      }
+
+      .flow-node .flow-icon {
+        height: 2.6rem;
+      }
+    }
+
+    /* ---------- instalação e conectividade ---------- */
+    .install-grid {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      gap: 3rem;
+      align-items: center;
+      margin-top: 2.75rem;
+    }
+
+    @media (max-width: 780px) {
+      .install-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    .install-photo {
+      margin: 0;
+    }
+
+    .install-photo img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 25px 45px -24px rgba(20, 15, 10, .35);
+    }
+
+    .install-photo figcaption {
+      margin-top: .65rem;
+      font-size: .8rem;
+      color: var(--muted-foreground);
+      text-align: center;
+    }
+
+    .install-options {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .install-option h3 {
+      margin: 0 0 .4rem;
+      font-size: 1.05rem;
+      letter-spacing: -.01em;
+    }
+
+    .install-option p {
+      margin: 0;
+      font-size: .875rem;
+      line-height: 1.6;
+      color: var(--muted-foreground);
+    }
+
+    /* ---------- página de configuração do equipamento ---------- */
+    .config-grid {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 3rem;
+      align-items: center;
+      margin-top: 2.75rem;
+    }
+
+    @media (max-width: 780px) {
+      .config-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    .config-shots {
+      display: flex;
+      gap: 1.25rem;
+    }
+
+    .config-shots .shot {
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .config-shots img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: .9rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px -22px rgba(20, 15, 10, .3);
+    }
+
+    .config-shots figcaption {
+      margin-top: .6rem;
+      font-size: .78rem;
+      color: var(--muted-foreground);
+      text-align: center;
+    }
+
+    .config-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* ---------- plataforma de monitoramento ---------- */
+    .platform-intro {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      gap: 3rem;
+      align-items: center;
+      margin-top: 2.75rem;
+    }
+
+    @media (max-width: 780px) {
+      .platform-intro {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    .platform-probe-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+
+    .platform-probe-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: .6rem;
+    }
+
+    .platform-intro h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: -.01em;
+    }
+
+    .platform-list {
+      list-style: none;
+      margin: 1.5rem 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .platform-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: .9rem;
+    }
+
+    .platform-list strong {
+      display: block;
+      font-size: .9rem;
+      margin-bottom: .2rem;
+    }
+
+    .platform-list span {
+      font-size: .8rem;
+      line-height: 1.5;
+      color: var(--muted-foreground);
+    }
+
+    .platform-shots {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 780px) {
+      .platform-shots {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .shot {
+      margin: 0;
+    }
+
+    .shot img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: .75rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 25px 45px -24px rgba(20, 15, 10, .35);
+    }
+
+    .shot figcaption {
+      margin-top: .65rem;
+      font-size: .8rem;
+      color: var(--muted-foreground);
+      text-align: center;
+    }
+
+    /* ---------- simulação ---------- */
+    .simulation-section {
+      background: var(--background);
+    }
+
+    .sim-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ---------- CTA final ---------- */
+    .final-cta {
+      background: var(--brand-dark);
+      color: var(--brand-on-dark);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta .wrap {
+      padding: 4rem 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta h2 {
+      font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.5rem);
+      margin: .75rem auto 0;
+      max-width: 38rem;
+      letter-spacing: -.01em;
+    }
+
+    .final-cta .lead {
+      margin: 1rem auto 0;
+      text-align: center;
+    }
+
+    .final-cta .hero-cta {
+      justify-content: center;
+    }
+
+    /* ---------- rodapé ---------- */
+    .site-footer {
+      background: var(--brand-dark-deep);
+      color: var(--brand-on-dark-muted);
+    }
+
+    .footer-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 2rem;
+      padding: 3rem 1.25rem 2rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .footer-brand img {
+      height: 44px;
+      width: auto;
+      border-radius: .3rem;
+    }
+
+    .footer-brand div strong {
+      display: block;
+      color: var(--brand-on-dark);
+      font-size: .95rem;
+    }
+
+    .footer-brand div span {
+      font-size: .8rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 2.5rem;
+    }
+
+    .footer-col h4 {
+      margin: 0 0 .7rem;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--brand-gold);
+    }
+
+    .footer-col a,
+    .footer-col p {
+      display: block;
+      color: var(--brand-on-dark-muted);
+      text-decoration: none;
+      font-size: .85rem;
+      margin: 0 0 .5rem;
+    }
+
+    .footer-col a:hover {
+      color: var(--brand-on-dark);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(244, 239, 231, .1);
+      padding: 1.1rem 1.25rem;
+      text-align: center;
+      font-size: .75rem;
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="site-header">
-  <nav class="wrap nav">
-    <a class="brand" href="#top">
-      <img src="img/logo.png" alt="Jóia Distribuidora" width="581" height="297" />
-    </a>
-    <ul class="nav-links" id="nav-links">
-      <li><a href="#produtos">Produtos</a></li>
-      <li><a href="#beneficios">Vantagens</a></li>
-      <li><a href="#instalacao">Instalação</a></li>
-      <li><a href="#configuracao">Configuração</a></li>
-      <li><a href="#plataforma">Plataforma</a></li>
-      <li><a href="#simulacao">Como funciona</a></li>
-      <li><a href="#contato">Contato</a></li>
-      <li class="nav-links-phone">
-        <a href="tel:+551733235359">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1rem;height:1rem;vertical-align:-2px;margin-right:.4rem;"><path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z"/></svg>
+  <header class="site-header">
+    <nav class="wrap nav">
+      <a class="brand" href="#top">
+        <img src="img/logo.png" alt="Jóia Distribuidora" width="581" height="297" />
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#produtos">Produtos</a></li>
+        <li><a href="#beneficios">Vantagens</a></li>
+        <li><a href="#instalacao">Instalação</a></li>
+        <li><a href="#configuracao">Configuração</a></li>
+        <li><a href="#plataforma">Plataforma</a></li>
+        <li><a href="#simulacao">Como funciona</a></li>
+        <li><a href="#contato">Contato</a></li>
+        <li class="nav-links-phone">
+          <a href="tel:+551733235359">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" style="width:1rem;height:1rem;vertical-align:-2px;margin-right:.4rem;">
+              <path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z" />
+            </svg>
+            (17) 3323-5359
+          </a>
+        </li>
+      </ul>
+      <div class="nav-cta">
+        <a class="phone-chip" href="tel:+551733235359">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z" />
+          </svg>
           (17) 3323-5359
         </a>
-      </li>
-    </ul>
-    <div class="nav-cta">
-      <a class="phone-chip" href="tel:+551733235359">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z"/></svg>
-        (17) 3323-5359
-      </a>
-      <a class="btn btn-gold btn-sm" href="#contato">Fale conosco</a>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
+        <a class="btn btn-gold btn-sm" href="#contato">Fale conosco</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <svg class="sparkle spark-1" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" />
+      </svg>
+      <svg class="sparkle spark-2" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" />
+      </svg>
+      <svg class="sparkle spark-3" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" />
+      </svg>
+      <div class="wrap hero-grid">
+        <div>
+          <p class="kicker on-dark">Telemetria LoRa &amp; 4G para o campo</p>
+          <h1>Controle o poço e o reservatório <em>de qualquer lugar</em></h1>
+          <p class="lead on-dark">A Jóia Distribuidora leva módulos de rádio LoRa e gateways 4G até a sua propriedade: o
+            nível é medido automaticamente, a bomba liga e desliga sozinha, e você acompanha tudo à distância — sem
+            depender de Wi-Fi local.</p>
+          <div class="hero-cta">
+            <a class="btn btn-gold" href="#produtos">Ver produtos</a>
+            <a class="btn btn-outline-dark" href="tel:+551733235359">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z" />
+              </svg>
+              Falar com um especialista
+            </a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <img src="img/reservatorio_4g.png" alt="Módulo RD-RTX2E2S Reservatório-4G, com conectividade LoRa e 4G"
+            width="1409" height="2659" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAIXA DE ESPECIFICAÇÕES ============ -->
+    <section class="trust-strip">
+      <div class="wrap trust-grid">
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+            <path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4" />
+            <path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4" />
+            <path d="M6 18a8.5 8.5 0 0 1 0-12" />
+            <path d="M18 18a8.5 8.5 0 0 0 0-12" />
+          </svg>
+          <span>Rádio LoRa de longo alcance</span>
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <line x1="4" y1="18" x2="4" y2="14" />
+            <line x1="9.3" y1="18" x2="9.3" y2="10" />
+            <line x1="14.6" y1="18" x2="14.6" y2="6" />
+            <line x1="20" y1="18" x2="20" y2="3" />
+          </svg>
+          <span>Gateway com conexão 4G</span>
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M12 3v11" />
+            <circle cx="12" cy="15.5" r="2.2" />
+            <path d="M5 19c2.5 1.3 11.5 1.3 14 0" stroke-width="1.4" />
+          </svg>
+          <span>Sonda hidrostática de nível</span>
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="5" cy="12" r="2" />
+            <circle cx="12" cy="12" r="2" />
+            <circle cx="19" cy="12" r="2" />
+          </svg>
+          <span>LEDs de diagnóstico Rx · Tx · Status</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BENEFÍCIOS ============ -->
+    <section id="beneficios" class="section">
+      <div class="wrap">
+        <div class="section-head center">
+          <p class="kicker">Por que automatizar</p>
+          <h2>Menos viagem até a fazenda, mais controle na palma da mão</h2>
+          <p class="lead" style="margin-left:auto;margin-right:auto;">Cada módulo troca dados por rádio o tempo todo,
+            para que a decisão de ligar ou desligar a bomba aconteça sozinha — e para que você só precise ir até o poço
+            quando for realmente necessário.</p>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="icon-badge gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"
+                stroke-linecap="round">
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+              </svg>
+            </div>
+            <h3>Liga/desliga automático</h3>
+            <p>A bomba responde sozinha aos níveis configurados no reservatório, 24 horas por dia, sem intervenção
+              manual.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon-badge blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+                <path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4" />
+                <path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4" />
+                <path d="M6 18a8.5 8.5 0 0 1 0-12" />
+                <path d="M18 18a8.5 8.5 0 0 0 0-12" />
+              </svg>
+            </div>
+            <h3>Alcance sem Wi-Fi local</h3>
+            <p>A tecnologia LoRa conecta pontos distantes da propriedade direto por rádio, sem depender de internet no
+              local.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon-badge gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <line x1="4" y1="18" x2="4" y2="14" />
+                <line x1="9.3" y1="18" x2="9.3" y2="10" />
+                <line x1="14.6" y1="18" x2="14.6" y2="6" />
+                <line x1="20" y1="18" x2="20" y2="3" />
+              </svg>
+            </div>
+            <h3>Acesso remoto via 4G</h3>
+            <p>O gateway Reservatório-4G leva os dados da fazenda até você, onde estiver, através da rede celular.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon-badge blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"
+                stroke-linecap="round">
+                <rect x="4" y="7" width="16" height="13" rx="1.5" />
+                <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M4 12h16" />
+              </svg>
+            </div>
+            <h3>Equipamento robusto</h3>
+            <p>Caixa vedada e com prensa-cabos, pronta para instalação externa junto ao poço ou ao reservatório.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon-badge gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="5" cy="12" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="19" cy="12" r="2" />
+              </svg>
+            </div>
+            <h3>Diagnóstico simples</h3>
+            <p>LEDs de Rx, Tx e Status deixam a instalação e a manutenção em campo mais rápidas, sem adivinhação.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="icon-badge blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"
+                stroke-linecap="round">
+                <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12Z" />
+                <circle cx="12" cy="9" r="2.3" />
+              </svg>
+            </div>
+            <h3>Menos deslocamento</h3>
+            <p>Acompanhe o nível do poço e do reservatório à distância e evite viagens desnecessárias até a propriedade.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRODUTOS ============ -->
+    <section id="produtos" class="section section-muted">
+      <div class="wrap">
+        <div class="section-head center">
+          <p class="kicker">Linha RD-RTX2E2S</p>
+          <h2>Um módulo para cada ponto do sistema</h2>
+          <p class="lead" style="margin-left:auto;margin-right:auto;">Os módulos conversam entre si por rádio LoRa e
+            formam, juntos, o sistema completo de automação — dos sensores de poço e reservatório aos gateways que levam
+            tudo até a plataforma.</p>
+        </div>
+
+        <div class="products-slider">
+          <div class="products-track" id="products-track">
+            <article class="product-card">
+              <div class="product-media"><img src="img/poço.png" alt="Módulo RD-RTX2E2S Poço" width="1408" height="2659"
+                  loading="lazy" /></div>
+              <div class="product-body">
+                <h3>Poço</h3>
+                <p>Instalado junto à bomba, recebe por rádio LoRa o comando de nível vindo do reservatório e liga ou
+                  desliga a bomba automaticamente.</p>
+                <div class="chip-row">
+                  <span class="spec-chip">LoRa</span>
+                </div>
+                <div class="product-actions">
+                  <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
+                  <button class="btn-usecase" type="button" data-usecase="poco">Como usar? →</button>
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-media"><img src="img/reservatorio_comum.png" alt="Módulo RD-RTX2E2S Reservatório"
+                  width="1409" height="2659" loading="lazy" /></div>
+              <div class="product-body">
+                <h3>Reservatório</h3>
+                <p>Mede o nível com sonda hidrostática e pode acionar a bomba diretamente, como se houvesse um poço
+                  embutido nele, ou comandar um poço à parte por rádio. Envia os dados para um gateway Wi-Fi ou 4G, que
+                  os leva até a plataforma.</p>
+                <div class="chip-row">
+                  <span class="spec-chip">LoRa</span>
+                  <span class="spec-chip">Sonda hidrostática</span>
+                </div>
+                <div class="product-actions">
+                  <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
+                  <button class="btn-usecase" type="button" data-usecase="reservatorio">Como usar? →</button>
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-media"><img src="img/reservatorio_wifi.png" alt="Módulo RD-RTX2E2S Reservatório-WiFi"
+                  width="1409" height="2659" loading="lazy" /></div>
+              <div class="product-body">
+                <h3>Reservatório-WiFi</h3>
+                <p>Mede o nível com sonda hidrostática e já se conecta direto à plataforma pela rede Wi-Fi local, sem
+                  precisar de outro gateway. Também pode acionar a bomba diretamente, como se houvesse um poço embutido
+                  nele, ou comandar um poço à parte.</p>
+                <div class="chip-row">
+                  <span class="spec-chip">LoRa</span>
+                  <span class="spec-chip">Wi-Fi</span>
+                  <span class="spec-chip">Sonda hidrostática</span>
+                </div>
+                <div class="product-actions">
+                  <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
+                  <button class="btn-usecase" type="button" data-usecase="reservatorio-wifi">Como usar? →</button>
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-media"><img src="img/reservatorio_4g.png" alt="Módulo RD-RTX2E2S Reservatório-4G"
+                  width="1409" height="2659" loading="lazy" /></div>
+              <div class="product-body">
+                <h3>Reservatório-4G</h3>
+                <p>Mede o nível com sonda hidrostática e já se conecta direto à plataforma pela rede celular, sem
+                  precisar de outro gateway. Também pode acionar a bomba diretamente, como se houvesse um poço embutido
+                  nele, ou comandar um poço à parte.</p>
+                <div class="chip-row">
+                  <span class="spec-chip">LoRa</span>
+                  <span class="spec-chip">4G</span>
+                  <span class="spec-chip">Sonda hidrostática</span>
+                </div>
+                <div class="product-actions">
+                  <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
+                  <button class="btn-usecase" type="button" data-usecase="reservatorio-4g">Como usar? →</button>
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-media"><img src="img/gateway_wifi.png" alt="Módulo RD-RTX2E2S Gateway Wi-Fi"
+                  width="1409" height="2659" loading="lazy" /></div>
+              <div class="product-body">
+                <h3>Gateway Wi-Fi</h3>
+                <p>Concentra os módulos LoRa da propriedade e leva a conexão até a internet pela rede Wi-Fi já existente
+                  no local — ideal para instalações urbanas, com muitos equipamentos próximos.</p>
+                <div class="chip-row">
+                  <span class="spec-chip">LoRa</span>
+                  <span class="spec-chip">Wi-Fi</span>
+                </div>
+                <div class="product-actions">
+                  <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
+                  <button class="btn-usecase" type="button" data-usecase="gateway-wifi">Como usar? →</button>
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-media"><img src="img/gateway_4g.png" alt="Módulo RD-RTX2E2S Gateway 4G" width="1409"
+                  height="2659" loading="lazy" /></div>
+              <div class="product-body">
+                <h3>Gateway 4G</h3>
+                <p>Concentra os módulos LoRa da propriedade e leva a conexão até a internet pela rede celular — ideal
+                  para áreas rurais ou pontos sem cobertura Wi-Fi.</p>
+                <div class="chip-row">
+                  <span class="spec-chip">LoRa</span>
+                  <span class="spec-chip">4G</span>
+                </div>
+                <div class="product-actions">
+                  <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
+                  <button class="btn-usecase" type="button" data-usecase="gateway-4g">Como usar? →</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="slider-controls">
+          <button class="slider-arrow" id="products-prev" aria-label="Produto anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <div class="slider-dots" id="products-dots"></div>
+          <button class="slider-arrow" id="products-next" aria-label="Próximo produto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ POPUPS "COMO USAR?" ============ -->
+    <div class="modal-backdrop" id="modal-backdrop">
+
+      <div class="usecase-modal" id="modal-poco" role="dialog" aria-modal="true" aria-labelledby="modal-poco-title">
+        <button class="modal-close" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg></button>
+        <p class="product-eyebrow">RD-RTX2E2S · Poço</p>
+        <h3 id="modal-poco-title">Como o Poço funciona na prática</h3>
+        <p class="lead">Ele é obrigatoriamente atrelado a um reservatório: escuta, pelo rádio LoRa, o nível que o
+          reservatório transmite — e decide sozinho quando ligar ou desligar a bomba.</p>
+        <div class="flow-block">
+          <p class="flow-row-label">Reservatório → Poço → Bomba</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_comum.png" alt="Reservatório" /><span>Reservatório</span>
+            </div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+                <path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4" />
+                <path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4" />
+                <path d="M6 18a8.5 8.5 0 0 1 0-12" />
+                <path d="M18 18a8.5 8.5 0 0 0 0-12" />
+              </svg><small>Rádio Nível</small></div>
+            <div class="flow-node"><img src="img/poço.png" alt="Poço" /><span>Poço</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linejoin="round" stroke-linecap="round">
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+              </svg><small>liga/desliga</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><img src="img/electric-motor.png" alt="Bomba" /></div><span>Bomba</span>
+            </div>
+          </div>
+        </div>
+        <p>O poço escuta cada transmissão de nível do reservatório e compara com os limites configurados nele mesmo — o
+          nível para ligar e o nível para desligar. É esse cruzamento entre o dado recebido por rádio e a configuração
+          local que faz o controle acontecer automaticamente.</p>
+        <div class="note"><strong>Cadastrado no reservatório:</strong> depois de vinculado, o status do poço (ligado ou
+          desligado) também aparece na própria página web do reservatório.</div>
+      </div>
+
+      <div class="usecase-modal" id="modal-reservatorio" role="dialog" aria-modal="true"
+        aria-labelledby="modal-reservatorio-title">
+        <button class="modal-close" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg></button>
+        <p class="product-eyebrow">RD-RTX2E2S · Reservatório</p>
+        <h3 id="modal-reservatorio-title">Como o Reservatório funciona na prática</h3>
+        <p class="lead">Não depende de um poço para funcionar: pode acionar a bomba pela própria saída. Um poço é
+          opcional — e, para subir os dados até a plataforma, ele sempre precisa de um gateway por perto.</p>
+        <div class="flow-block">
+          <p class="flow-row-label">Saída Propria → Bomba</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_comum.png" alt="Reservatório" /><span>Reservatório</span>
+            </div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linejoin="round" stroke-linecap="round">
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+              </svg><small>Saída Propria</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><img src="img/electric-motor.png" alt="Bomba" /></div><span>Bomba</span>
+            </div>
+          </div>
+        </div>
+        <div class="flow-block">
+          <p class="flow-row-label">A cada transmissão, todos escutam</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_comum.png" alt="Reservatório" /><span>Reservatório</span>
+            </div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+                <path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4" />
+                <path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4" />
+                <path d="M6 18a8.5 8.5 0 0 1 0-12" />
+                <path d="M18 18a8.5 8.5 0 0 0 0-12" />
+              </svg><small>Rádio Nível</small></div>
+            <div class="flow-node"><img src="img/poço.png" alt="Poço" /><span>Poço (opcional)</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+                <path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4" />
+                <path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4" />
+                <path d="M6 18a8.5 8.5 0 0 1 0-12" />
+                <path d="M18 18a8.5 8.5 0 0 0 0-12" />
+              </svg><small>Rádio Nível</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="4" y="9" width="16" height="7" rx="1.5" />
+                  <path d="M8 9V6a4 4 0 0 1 8 0v3" />
+                  <circle cx="9" cy="12.5" r=".8" fill="currentColor" stroke="none" />
+                  <circle cx="12" cy="12.5" r=".8" fill="currentColor" stroke="none" />
+                </svg></div><span>Gateway</span>
+            </div>
+          </div>
+        </div>
+        <p>Toda vez que o reservatório transmite o nível por rádio, o gateway (Wi-Fi ou 4G) e o poço, se houver, escutam
+          ao mesmo tempo e fazem cada um sua própria lógica — o gateway publica o dado na plataforma, o poço decide
+          sobre a bomba.</p>
+        <div class="note"><strong>Sozinho, ele não sobe dados:</strong> sem um gateway por perto, o reservatório comum
+          continua controlando a bomba normalmente, mas ninguém recebe esses dados na plataforma.</div>
+      </div>
+
+      <div class="usecase-modal" id="modal-reservatorio-wifi" role="dialog" aria-modal="true"
+        aria-labelledby="modal-reservatorio-wifi-title">
+        <button class="modal-close" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg></button>
+        <p class="product-eyebrow">RD-RTX2E2S · Reservatório-WiFi</p>
+        <h3 id="modal-reservatorio-wifi-title">Como o Reservatório-WiFi funciona na prática</h3>
+        <p class="lead">Segue a mesma lógica do Reservatório-4G — mas sobe os dados até a plataforma pela rede Wi-Fi do
+          local, em vez da rede celular.</p>
+        <div class="flow-block">
+          <p class="flow-row-label">Saída Propria ou poço à parte</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_wifi.png"
+                alt="Reservatório-WiFi" /><span>Reservatório-WiFi</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linejoin="round" stroke-linecap="round">
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+              </svg><small>Saída Propria</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><img src="img/electric-motor.png" alt="Bomba" /></div><span>Bomba</span>
+            </div>
+          </div>
+        </div>
+        <div class="flow-block">
+          <p class="flow-row-label">Poço à parte (opcional)</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_wifi.png"
+                alt="Reservatório-WiFi" /><span>Reservatório-WiFi</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+                <path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4" />
+                <path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4" />
+                <path d="M6 18a8.5 8.5 0 0 1 0-12" />
+                <path d="M18 18a8.5 8.5 0 0 0 0-12" />
+              </svg><small>Rádio Nível</small></div>
+            <div class="flow-node"><img src="img/poço.png" alt="Poço" /><span>Poço (opcional)</span></div>
+          </div>
+        </div>
+        <div class="flow-block">
+          <p class="flow-row-label">Conexão direta com a plataforma</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_wifi.png"
+                alt="Reservatório-WiFi" /><span>Reservatório-WiFi</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <path d="M4 8.5a12 12 0 0 1 16 0" />
+                <path d="M7 12a8 8 0 0 1 10 0" />
+                <path d="M10 15.5a4 4 0 0 1 4 0" />
+                <circle cx="12" cy="19" r="1" fill="currentColor" stroke="none" />
+              </svg><small>Wi-Fi local</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="4" y="4" width="16" height="6" rx="1.5" />
+                  <rect x="4" y="14" width="16" height="6" rx="1.5" />
+                  <circle cx="7.5" cy="7" r=".8" fill="currentColor" stroke="none" />
+                  <circle cx="7.5" cy="17" r=".8" fill="currentColor" stroke="none" />
+                </svg></div><span>Plataforma</span>
+            </div>
+          </div>
+        </div>
+        <p>Assim como o reservatório comum, ele pode acionar a bomba direto pela própria saída ou comandar um poço à
+          parte por rádio. A diferença é que ele não depende de gateway: se conecta sozinho à internet pela rede Wi-Fi
+          do local e envia os dados direto para a plataforma.</p>
+        <div class="note"><strong>Onde instalar:</strong> funciona tanto na cidade quanto em áreas mais remotas — desde
+          que haja uma rede Wi-Fi disponível no ponto de instalação.</div>
+      </div>
+
+      <div class="usecase-modal" id="modal-reservatorio-4g" role="dialog" aria-modal="true"
+        aria-labelledby="modal-reservatorio-4g-title">
+        <button class="modal-close" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg></button>
+        <p class="product-eyebrow">RD-RTX2E2S · Reservatório-4G</p>
+        <h3 id="modal-reservatorio-4g-title">Como o Reservatório-4G funciona na prática</h3>
+        <p class="lead">Segue a mesma lógica do reservatório comum, mas não depende de um gateway para subir os dados:
+          ele mesmo se conecta à plataforma via modem 4G.</p>
+        <div class="flow-block">
+          <p class="flow-row-label">Saída Propria ou poço à parte</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_4g.png"
+                alt="Reservatório-4G" /><span>Reservatório-4G</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linejoin="round" stroke-linecap="round">
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+              </svg><small>Saída Propria</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><img src="img/electric-motor.png" alt="Bomba" /></div><span>Bomba</span>
+            </div>
+          </div>
+        </div>
+        <div class="flow-block">
+          <p class="flow-row-label">Poço à parte (opcional)</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_4g.png"
+                alt="Reservatório-4G" /><span>Reservatório-4G</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+                <path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4" />
+                <path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4" />
+                <path d="M6 18a8.5 8.5 0 0 1 0-12" />
+                <path d="M18 18a8.5 8.5 0 0 0 0-12" />
+              </svg><small>Rádio Nível</small></div>
+            <div class="flow-node"><img src="img/poço.png" alt="Poço" /><span>Poço (opcional)</span></div>
+          </div>
+        </div>
+        <div class="flow-block">
+          <p class="flow-row-label">Conexão direta com a plataforma</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/reservatorio_4g.png"
+                alt="Reservatório-4G" /><span>Reservatório-4G</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <line x1="4" y1="18" x2="4" y2="14" />
+                <line x1="9.3" y1="18" x2="9.3" y2="10" />
+                <line x1="14.6" y1="18" x2="14.6" y2="6" />
+                <line x1="20" y1="18" x2="20" y2="3" />
+              </svg><small>modem 4G</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="4" y="4" width="16" height="6" rx="1.5" />
+                  <rect x="4" y="14" width="16" height="6" rx="1.5" />
+                  <circle cx="7.5" cy="7" r=".8" fill="currentColor" stroke="none" />
+                  <circle cx="7.5" cy="17" r=".8" fill="currentColor" stroke="none" />
+                </svg></div><span>Plataforma</span>
+            </div>
+          </div>
+        </div>
+        <p>Ele também pode acionar a bomba direto pela própria saída ou comandar um poço à parte por rádio. A diferença
+          é que, em vez de depender de um gateway, ele mesmo se conecta à plataforma via modem 4G.</p>
+        <div class="note"><strong>Onde instalar:</strong> por não depender de Wi-Fi local, pode ser instalado em locais
+          mais remotos, onde não há internet disponível no ponto.</div>
+      </div>
+
+      <div class="usecase-modal" id="modal-gateway-wifi" role="dialog" aria-modal="true"
+        aria-labelledby="modal-gateway-wifi-title">
+        <button class="modal-close" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg></button>
+        <p class="product-eyebrow">RD-RTX2E2S · Gateway Wi-Fi</p>
+        <h3 id="modal-gateway-wifi-title">Como o Gateway Wi-Fi funciona na prática</h3>
+        <p class="lead">É nele que você cadastra grupos de equipamentos — quantos reservatórios e poços forem
+          necessários — e acompanha o status de todos, reunidos num só lugar.</p>
+        <div class="flow-block">
+          <p class="flow-row-label">Pergunta o status, periodicamente</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/gateway_wifi.png" alt="Gateway Wi-Fi" /><span>Gateway Wi-Fi</span>
+            </div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 3" />
+              </svg><small>a cada x tempo</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="4" y="4" width="7" height="7" rx="1" />
+                  <rect x="13" y="4" width="7" height="7" rx="1" />
+                  <rect x="4" y="13" width="7" height="7" rx="1" />
+                  <rect x="13" y="13" width="7" height="7" rx="1" />
+                </svg></div><span>Reservatórios e Poços Cadastrados</span>
+            </div>
+          </div>
+        </div>
+        <div class="flow-block">
+          <p class="flow-row-label">Sobe os dados</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/gateway_wifi.png" alt="Gateway Wi-Fi" /><span>Gateway Wi-Fi</span>
+            </div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <path d="M4 8.5a12 12 0 0 1 16 0" />
+                <path d="M7 12a8 8 0 0 1 10 0" />
+                <path d="M10 15.5a4 4 0 0 1 4 0" />
+                <circle cx="12" cy="19" r="1" fill="currentColor" stroke="none" />
+              </svg><small>Wi-Fi local</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="4" y="4" width="16" height="6" rx="1.5" />
+                  <rect x="4" y="14" width="16" height="6" rx="1.5" />
+                  <circle cx="7.5" cy="7" r=".8" fill="currentColor" stroke="none" />
+                  <circle cx="7.5" cy="17" r=".8" fill="currentColor" stroke="none" />
+                </svg></div><span>Plataforma</span>
+            </div>
+          </div>
+        </div>
+        <p>Depois de cadastrado o grupo, o gateway pergunta por rádio, em um intervalo de tempo configurável, como está
+          o status de cada reservatório e poço vinculado a ele. As respostas são enviadas para a plataforma pela rede
+          Wi-Fi do local.</p>
+      </div>
+
+      <div class="usecase-modal" id="modal-gateway-4g" role="dialog" aria-modal="true"
+        aria-labelledby="modal-gateway-4g-title">
+        <button class="modal-close" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg></button>
+        <p class="product-eyebrow">RD-RTX2E2S · Gateway 4G</p>
+        <h3 id="modal-gateway-4g-title">Como o Gateway 4G funciona na prática</h3>
+        <p class="lead">Funciona exatamente como o Gateway Wi-Fi — cadastra grupos de equipamentos e pergunta o status
+          de cada um periodicamente — mas envia os dados pela rede celular, em vez de depender de Wi-Fi local.</p>
+        <div class="flow-block">
+          <p class="flow-row-label">Pergunta o status, periodicamente</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/gateway_4g.png" alt="Gateway 4G" /><span>Gateway 4G</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 3" />
+              </svg><small>a cada x tempo</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="4" y="4" width="7" height="7" rx="1" />
+                  <rect x="13" y="4" width="7" height="7" rx="1" />
+                  <rect x="4" y="13" width="7" height="7" rx="1" />
+                  <rect x="13" y="13" width="7" height="7" rx="1" />
+                </svg></div><span>Reservatórios e Poços Cadastrados</span>
+            </div>
+          </div>
+        </div>
+        <div class="flow-block">
+          <p class="flow-row-label">Sobe os dados</p>
+          <div class="usecase-flow">
+            <div class="flow-node"><img src="img/gateway_4g.png" alt="Gateway 4G" /><span>Gateway 4G</span></div>
+            <div class="flow-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round">
+                <line x1="4" y1="18" x2="4" y2="14" />
+                <line x1="9.3" y1="18" x2="9.3" y2="10" />
+                <line x1="14.6" y1="18" x2="14.6" y2="6" />
+                <line x1="20" y1="18" x2="20" y2="3" />
+              </svg><small>modem 4G</small></div>
+            <div class="flow-node">
+              <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" stroke-linecap="round">
+                  <rect x="4" y="4" width="16" height="6" rx="1.5" />
+                  <rect x="4" y="14" width="16" height="6" rx="1.5" />
+                  <circle cx="7.5" cy="7" r=".8" fill="currentColor" stroke="none" />
+                  <circle cx="7.5" cy="17" r=".8" fill="currentColor" stroke="none" />
+                </svg></div><span>Plataforma</span>
+            </div>
+          </div>
+        </div>
+        <p>Depois de cadastrado o grupo, o gateway pergunta por rádio, em um intervalo de tempo configurável, como está
+          o status de cada reservatório e poço vinculado a ele. As respostas são enviadas para a plataforma pela rede
+          celular (4G), ideal para onde não há Wi-Fi disponível.</p>
+      </div>
+
     </div>
-  </nav>
-</header>
 
-<main id="top">
+    <!-- ============ INSTALAÇÃO E CONECTIVIDADE ============ -->
+    <section id="instalacao" class="section">
+      <div class="wrap">
+        <div class="section-head center">
+          <p class="kicker">Instalação em campo</p>
+          <h2>Wi-Fi ou 4G: o gateway certo para cada instalação</h2>
+          <p class="lead" style="margin-left:auto;margin-right:auto;">Os módulos RD-RTX2E2S são reunidos em um quadro de
+            comando e conectados à internet por um gateway — a escolha entre Wi-Fi e 4G depende do local e de quantos
+            equipamentos ficam próximos uns dos outros.</p>
+        </div>
 
-  <!-- ============ HERO ============ -->
-  <section class="hero">
-    <svg class="sparkle spark-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z"/></svg>
-    <svg class="sparkle spark-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z"/></svg>
-    <svg class="sparkle spark-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z"/></svg>
-    <div class="wrap hero-grid">
-      <div>
-        <p class="kicker on-dark">Telemetria LoRa &amp; 4G para o campo</p>
-        <h1>Controle o poço e o reservatório <em>de qualquer lugar</em></h1>
-        <p class="lead on-dark">A Jóia Distribuidora leva módulos de rádio LoRa e gateways 4G até a sua propriedade: o nível é medido automaticamente, a bomba liga e desliga sozinha, e você acompanha tudo à distância — sem depender de Wi-Fi local.</p>
+        <div class="install-grid">
+          <figure class="install-photo">
+            <img src="img/instalacao.jpeg"
+              alt="Quadro de comando com módulos Reservatório-4G e Gateway Wi-Fi instalados lado a lado" width="720"
+              height="1280" loading="lazy" />
+            <figcaption>Quadro de comando real, com um módulo Reservatório-4G e dois módulos Gateway Wi-Fi instalados
+              lado a lado</figcaption>
+          </figure>
+          <div class="install-options">
+            <div class="install-option">
+              <div class="icon-badge blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <path d="M4 8.5a12 12 0 0 1 16 0" />
+                  <path d="M7 12a8 8 0 0 1 10 0" />
+                  <path d="M10 15.5a4 4 0 0 1 4 0" />
+                  <circle cx="12" cy="19" r="1" fill="currentColor" stroke="none" />
+                </svg>
+              </div>
+              <h3>Gateway Wi-Fi</h3>
+              <p>Indicado para áreas urbanas, com muitos equipamentos concentrados. Aproveita a rede Wi-Fi já existente
+                no local para conectar os módulos à internet, sem custo de dados adicional.</p>
+            </div>
+            <div class="install-option">
+              <div class="icon-badge gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <line x1="4" y1="18" x2="4" y2="14" />
+                  <line x1="9.3" y1="18" x2="9.3" y2="10" />
+                  <line x1="14.6" y1="18" x2="14.6" y2="6" />
+                  <line x1="20" y1="18" x2="20" y2="3" />
+                </svg>
+              </div>
+              <h3>Reservatório-4G</h3>
+              <p>Indicado para áreas rurais ou instalações com poucos equipamentos, sem cobertura Wi-Fi. Leva a conexão
+                direto pela rede celular, sem depender de internet local.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PÁGINA DE CONFIGURAÇÃO DO EQUIPAMENTO ============ -->
+    <section id="configuracao" class="section">
+      <div class="wrap">
+        <div class="section-head center">
+          <p class="kicker">Interface local de configuração</p>
+          <h2>Cada equipamento tem sua própria página de configuração</h2>
+          <p class="lead" style="margin-left:auto;margin-right:auto;">Ao conectar em qualquer módulo RD-RTX2E2S, você
+            acessa uma página de configuração própria dele — aqui usamos a do Reservatório-4G como exemplo, mas o poço,
+            os gateways e as demais variantes de reservatório funcionam da mesma forma.</p>
+        </div>
+
+        <div class="config-grid">
+          <div class="config-shots">
+            <figure class="shot">
+              <img src="img/web1.jpeg"
+                alt="Página de configuração do Reservatório-4G: status de conexões e nível do reservatório" width="739"
+                height="1600" loading="lazy" />
+              <figcaption>Status de conexão e nível do reservatório</figcaption>
+            </figure>
+            <figure class="shot">
+              <img src="img/web2.jpeg"
+                alt="Página de configuração do Reservatório-4G: entradas digitais e status das saídas" width="739"
+                height="1600" loading="lazy" />
+              <figcaption>Entradas digitais e status das saídas</figcaption>
+            </figure>
+          </div>
+          <div class="config-options">
+            <div class="install-option">
+              <div class="icon-badge blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <line x1="4" y1="18" x2="4" y2="14" />
+                  <line x1="9.3" y1="18" x2="9.3" y2="10" />
+                  <line x1="14.6" y1="18" x2="14.6" y2="6" />
+                  <line x1="20" y1="18" x2="20" y2="3" />
+                </svg>
+              </div>
+              <h3>Status de conexões</h3>
+              <p>Mostra a força do sinal, se o equipamento está conectado à internet — 4G ou Wi-Fi, conforme o modelo —
+                e se a comunicação com a plataforma está ativa, tudo de relance.</p>
+            </div>
+            <div class="install-option">
+              <div class="icon-badge gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"
+                  stroke-linecap="round">
+                  <rect x="7" y="4" width="10" height="16" rx="2" />
+                  <line x1="7" y1="13" x2="17" y2="13" />
+                </svg>
+              </div>
+              <h3>Nível do reservatório</h3>
+              <p>O nível medido pela sonda hidrostática aparece em tempo real, com o identificador do reservatório
+                cadastrado.</p>
+            </div>
+            <div class="install-option">
+              <div class="icon-badge blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"
+                  stroke-linecap="round">
+                  <rect x="3" y="8" width="18" height="8" rx="4" />
+                  <circle cx="8" cy="12" r="3" fill="currentColor" stroke="none" />
+                </svg>
+              </div>
+              <h3>Status das saídas</h3>
+              <p>Cada saída controla uma bomba ligada ao reservatório — em modo Automático, liga e desliga sozinha entre
+                o nível mínimo e máximo configurados, ou em modo Remoto, acionada pela plataforma.</p>
+            </div>
+            <div class="install-option">
+              <div class="icon-badge gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M3 12h3l2-6 4 12 2-6h7" />
+                </svg>
+              </div>
+              <h3>Entradas digitais</h3>
+              <p>Acompanham o status de outro equipamento próximo — como uma bomba de cloro ou qualquer outra bomba
+                externa — direto pela mesma interface do reservatório.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PLATAFORMA DE MONITORAMENTO ============ -->
+    <section id="plataforma" class="section section-muted">
+      <div class="wrap">
+        <div class="section-head center">
+          <p class="kicker">Plataforma web</p>
+          <h2>Todos os poços e reservatórios cadastrados, em um só painel</h2>
+          <p class="lead" style="margin-left:auto;margin-right:auto;">Os dados captados pela sonda hidrostática de cada
+            ponto chegam até você pela plataforma de monitoramento da Jóia Distribuidora, alimentada pelo gateway Wi-Fi
+            ou 4G de cada instalação. Cadastre cada poço e reservatório da propriedade e acompanhe tudo à distância.</p>
+        </div>
+
+        <div class="platform-intro">
+          <div class="platform-probe-card">
+            <img src="img/sonda_hidrostatica.jpg" alt="Sonda hidrostática de nível" width="447" height="489"
+              loading="lazy" />
+          </div>
+          <div>
+            <h3>Sonda hidrostática de nível</h3>
+            <p class="lead" style="margin-top:.5rem;">Instalada dentro do poço ou do reservatório, a sonda mede a
+              pressão da coluna d'água e converte essa leitura em nível — o dado que o módulo do Reservatório transmite
+              por rádio LoRa até a plataforma.</p>
+            <ul class="platform-list">
+              <li>
+                <div class="icon-badge gold sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+                    <path d="M3.5 9h17" />
+                    <path d="M8 4.5v-1M16 4.5v-1" />
+                  </svg>
+                </div>
+                <div><strong>Cadastro de poços e reservatórios</strong><span>Organize cada ponto da propriedade com
+                    nome, localização e histórico próprio.</span></div>
+              </li>
+              <li>
+                <div class="icon-badge blue sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M4 19V9M10 19V5M16 19v-7M4 19h16" stroke-width="1.6" />
+                  </svg>
+                </div>
+                <div><strong>Alertas e histórico de leituras</strong><span>Saiba na hora se algo sai do esperado e
+                    consulte o comportamento do nível ao longo do tempo.</span></div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="platform-shots">
+          <figure class="shot shot-main">
+            <img src="img/plataforma.jpg" alt="Visão geral da plataforma, com poços e reservatórios cadastrados no mapa"
+              width="1919" height="1200" loading="lazy" />
+            <figcaption>Visão geral — todos os poços e reservatórios cadastrados, com nível e horário da última leitura
+            </figcaption>
+          </figure>
+          <figure class="shot shot-secondary">
+            <img src="img/plataforma2.jpg" alt="Detalhe de um concentrador na plataforma, com reservatórios e bombas"
+              width="1649" height="985" loading="lazy" />
+            <figcaption>Detalhe de um concentrador, com reservatórios e bombas em tempo real</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SIMULAÇÃO (mantida) ============ -->
+    <section id="simulacao" class="section simulation-section">
+      <div class="wrap">
+        <div class="sim-head">
+          <div class="section-head">
+            <p class="kicker">Telemetria • Rádio, ao vivo</p>
+            <h2>Veja o sistema funcionando</h2>
+            <p class="lead">O reservatório monitora seu nível e transmite o valor via rádio. A casa de bomba (gateway) e
+              o poço escutam a mesma transmissão ao mesmo tempo — o poço liga ou desliga a bomba conforme o setpoint
+              configurado.</p>
+          </div>
+          <div class="buttons">
+            <button id="toggle">Pausar</button>
+            <button id="reset">Reiniciar</button>
+          </div>
+        </div>
+
+        <section class="panel diagram">
+          <svg id="svg" viewBox="0 0 900 446" role="img"
+            aria-label="Diagrama: casa de bomba, poço e reservatório"></svg>
+        </section>
+
+        <section class="panel config">
+          <h2>Configuração</h2>
+          <div class="cfg-grid">
+            <label>
+              <div class="row"><span>Nível para LIGAR a bomba</span><span class="val"><span
+                    id="v-liga">30</span>%</span></div>
+              <input id="liga" type="range" min="5" max="95" value="30" />
+            </label>
+            <label>
+              <div class="row"><span>Nível para DESLIGAR a bomba</span><span class="val"><span
+                    id="v-desliga">90</span>%</span></div>
+              <input id="desliga" type="range" min="10" max="100" value="90" />
+            </label>
+            <label>
+              <div class="row"><span>Consumo da rede</span><span class="val"><span id="v-consumo">3</span>%/s</span>
+              </div>
+              <input id="consumo" type="range" min="0" max="10" value="3" />
+            </label>
+            <label>
+              <div class="row"><span>Vazão da bomba</span><span class="val"><span id="v-vazao">7</span>%/s</span></div>
+              <input id="vazao" type="range" min="1" max="15" value="7" />
+            </label>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ CTA FINAL ============ -->
+    <section id="contato" class="final-cta">
+      <svg class="sparkle spark-1" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" />
+      </svg>
+      <svg class="sparkle spark-2" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" />
+      </svg>
+      <div class="wrap">
+        <p class="kicker on-dark" style="text-align:center;">Pronto para automatizar?</p>
+        <h2>Fale com a Jóia Distribuidora e leve telemetria LoRa e 4G para o seu poço e reservatório</h2>
+        <p class="lead on-dark">Atendimento direto com quem instala e conhece o equipamento na prática.</p>
         <div class="hero-cta">
-          <a class="btn btn-gold" href="#produtos">Ver produtos</a>
-          <a class="btn btn-outline-dark" href="tel:+551733235359">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z"/></svg>
-            Falar com um especialista
+          <a class="btn btn-gold" href="tel:+551733235359">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z" />
+            </svg>
+            (17) 3323-5359
           </a>
         </div>
       </div>
-      <div class="hero-art">
-        <img src="img/reservatorio_4g.png" alt="Módulo RD-RTX2E2S Reservatório-4G, com conectividade LoRa e 4G" width="1409" height="2659" />
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============ FAIXA DE ESPECIFICAÇÕES ============ -->
-  <section class="trust-strip">
-    <div class="wrap trust-grid">
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4"/><path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4"/><path d="M6 18a8.5 8.5 0 0 1 0-12"/><path d="M18 18a8.5 8.5 0 0 0 0-12"/></svg>
-        <span>Rádio LoRa de longo alcance</span>
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="18" x2="4" y2="14"/><line x1="9.3" y1="18" x2="9.3" y2="10"/><line x1="14.6" y1="18" x2="14.6" y2="6"/><line x1="20" y1="18" x2="20" y2="3"/></svg>
-        <span>Gateway com conexão 4G</span>
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><circle cx="12" cy="15.5" r="2.2"/><path d="M5 19c2.5 1.3 11.5 1.3 14 0" stroke-width="1.4"/></svg>
-        <span>Sonda hidrostática de nível</span>
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-        <span>LEDs de diagnóstico Rx · Tx · Status</span>
-      </div>
-    </div>
-  </section>
+  </main>
 
-  <!-- ============ BENEFÍCIOS ============ -->
-  <section id="beneficios" class="section">
-    <div class="wrap">
-      <div class="section-head center">
-        <p class="kicker">Por que automatizar</p>
-        <h2>Menos viagem até a fazenda, mais controle na palma da mão</h2>
-        <p class="lead" style="margin-left:auto;margin-right:auto;">Cada módulo troca dados por rádio o tempo todo, para que a decisão de ligar ou desligar a bomba aconteça sozinha — e para que você só precise ir até o poço quando for realmente necessário.</p>
-      </div>
-      <div class="benefits-grid">
-        <div class="benefit-card">
-          <div class="icon-badge gold">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
-          </div>
-          <h3>Liga/desliga automático</h3>
-          <p>A bomba responde sozinha aos níveis configurados no reservatório, 24 horas por dia, sem intervenção manual.</p>
-        </div>
-        <div class="benefit-card">
-          <div class="icon-badge blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M8.8 15.2a4.5 4.5 0 0 1 0-6.4"/><path d="M15.2 15.2a4.5 4.5 0 0 0 0-6.4"/><path d="M6 18a8.5 8.5 0 0 1 0-12"/><path d="M18 18a8.5 8.5 0 0 0 0-12"/></svg>
-          </div>
-          <h3>Alcance sem Wi-Fi local</h3>
-          <p>A tecnologia LoRa conecta pontos distantes da propriedade direto por rádio, sem depender de internet no local.</p>
-        </div>
-        <div class="benefit-card">
-          <div class="icon-badge gold">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="18" x2="4" y2="14"/><line x1="9.3" y1="18" x2="9.3" y2="10"/><line x1="14.6" y1="18" x2="14.6" y2="6"/><line x1="20" y1="18" x2="20" y2="3"/></svg>
-          </div>
-          <h3>Acesso remoto via 4G</h3>
-          <p>O gateway Reservatório-4G leva os dados da fazenda até você, onde estiver, através da rede celular.</p>
-        </div>
-        <div class="benefit-card">
-          <div class="icon-badge blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="7" width="16" height="13" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M4 12h16"/></svg>
-          </div>
-          <h3>Equipamento robusto</h3>
-          <p>Caixa vedada e com prensa-cabos, pronta para instalação externa junto ao poço ou ao reservatório.</p>
-        </div>
-        <div class="benefit-card">
-          <div class="icon-badge gold">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-          </div>
-          <h3>Diagnóstico simples</h3>
-          <p>LEDs de Rx, Tx e Status deixam a instalação e a manutenção em campo mais rápidas, sem adivinhação.</p>
-        </div>
-        <div class="benefit-card">
-          <div class="icon-badge blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>
-          </div>
-          <h3>Menos deslocamento</h3>
-          <p>Acompanhe o nível do poço e do reservatório à distância e evite viagens desnecessárias até a propriedade.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PRODUTOS ============ -->
-  <section id="produtos" class="section section-muted">
-    <div class="wrap">
-      <div class="section-head center">
-        <p class="kicker">Linha RD-RTX2E2S</p>
-        <h2>Um módulo para cada ponto do sistema</h2>
-        <p class="lead" style="margin-left:auto;margin-right:auto;">Os módulos conversam entre si por rádio LoRa e formam, juntos, o sistema completo de automação — dos sensores de poço e reservatório aos gateways que levam tudo até a plataforma.</p>
-      </div>
-
-      <div class="products-slider">
-        <div class="products-track" id="products-track">
-          <article class="product-card">
-            <div class="product-media"><img src="img/poço.png" alt="Módulo RD-RTX2E2S Poço" width="1408" height="2659" loading="lazy" /></div>
-            <div class="product-body">
-              <h3>Poço</h3>
-              <p>Instalado junto à bomba, recebe por rádio LoRa o comando de nível vindo do reservatório e liga ou desliga a bomba automaticamente.</p>
-              <div class="chip-row">
-                <span class="spec-chip">LoRa</span>
-              </div>
-              <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <div class="product-media"><img src="img/reservatorio_comum.png" alt="Módulo RD-RTX2E2S Reservatório" width="1409" height="2659" loading="lazy" /></div>
-            <div class="product-body">
-              <h3>Reservatório</h3>
-              <p>Mede o nível com sonda hidrostática e pode acionar a bomba diretamente, como se houvesse um poço embutido nele, ou comandar um poço à parte por rádio. Envia os dados para um gateway Wi-Fi ou 4G, que os leva até a plataforma.</p>
-              <div class="chip-row">
-                <span class="spec-chip">LoRa</span>
-                <span class="spec-chip">Sonda hidrostática</span>
-              </div>
-              <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <div class="product-media"><img src="img/reservatorio_wifi.png" alt="Módulo RD-RTX2E2S Reservatório-WiFi" width="1409" height="2659" loading="lazy" /></div>
-            <div class="product-body">
-              <h3>Reservatório-WiFi</h3>
-              <p>Mede o nível com sonda hidrostática e já se conecta direto à plataforma pela rede Wi-Fi local, sem precisar de outro gateway. Também pode acionar a bomba diretamente, como se houvesse um poço embutido nele, ou comandar um poço à parte.</p>
-              <div class="chip-row">
-                <span class="spec-chip">LoRa</span>
-                <span class="spec-chip">Wi-Fi</span>
-                <span class="spec-chip">Sonda hidrostática</span>
-              </div>
-              <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <div class="product-media"><img src="img/reservatorio_4g.png" alt="Módulo RD-RTX2E2S Reservatório-4G" width="1409" height="2659" loading="lazy" /></div>
-            <div class="product-body">
-              <h3>Reservatório-4G</h3>
-              <p>Mede o nível com sonda hidrostática e já se conecta direto à plataforma pela rede celular, sem precisar de outro gateway. Também pode acionar a bomba diretamente, como se houvesse um poço embutido nele, ou comandar um poço à parte.</p>
-              <div class="chip-row">
-                <span class="spec-chip">LoRa</span>
-                <span class="spec-chip">4G</span>
-                <span class="spec-chip">Sonda hidrostática</span>
-              </div>
-              <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <div class="product-media"><img src="img/gateway_wifi.png" alt="Módulo RD-RTX2E2S Gateway Wi-Fi" width="1409" height="2659" loading="lazy" /></div>
-            <div class="product-body">
-              <h3>Gateway Wi-Fi</h3>
-              <p>Concentra os módulos LoRa da propriedade e leva a conexão até a internet pela rede Wi-Fi já existente no local — ideal para instalações urbanas, com muitos equipamentos próximos.</p>
-              <div class="chip-row">
-                <span class="spec-chip">LoRa</span>
-                <span class="spec-chip">Wi-Fi</span>
-              </div>
-              <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <div class="product-media"><img src="img/gateway_4g.png" alt="Módulo RD-RTX2E2S Gateway 4G" width="1409" height="2659" loading="lazy" /></div>
-            <div class="product-body">
-              <h3>Gateway 4G</h3>
-              <p>Concentra os módulos LoRa da propriedade e leva a conexão até a internet pela rede celular — ideal para áreas rurais ou pontos sem cobertura Wi-Fi.</p>
-              <div class="chip-row">
-                <span class="spec-chip">LoRa</span>
-                <span class="spec-chip">4G</span>
-              </div>
-              <a class="btn btn-outline btn-sm" href="tel:+551733235359">Consultar disponibilidade</a>
-            </div>
-          </article>
-        </div>
-      </div>
-      <div class="slider-controls">
-        <button class="slider-arrow" id="products-prev" aria-label="Produto anterior">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="slider-dots" id="products-dots"></div>
-        <button class="slider-arrow" id="products-next" aria-label="Próximo produto">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ INSTALAÇÃO E CONECTIVIDADE ============ -->
-  <section id="instalacao" class="section">
-    <div class="wrap">
-      <div class="section-head center">
-        <p class="kicker">Instalação em campo</p>
-        <h2>Wi-Fi ou 4G: o gateway certo para cada instalação</h2>
-        <p class="lead" style="margin-left:auto;margin-right:auto;">Os módulos RD-RTX2E2S são reunidos em um quadro de comando e conectados à internet por um gateway — a escolha entre Wi-Fi e 4G depende do local e de quantos equipamentos ficam próximos uns dos outros.</p>
-      </div>
-
-      <div class="install-grid">
-        <figure class="install-photo">
-          <img src="img/instalacao.jpeg" alt="Quadro de comando com módulos Reservatório-4G e Gateway Wi-Fi instalados lado a lado" width="720" height="1280" loading="lazy" />
-          <figcaption>Quadro de comando real, com um módulo Reservatório-4G e dois módulos Gateway Wi-Fi instalados lado a lado</figcaption>
-        </figure>
-        <div class="install-options">
-          <div class="install-option">
-            <div class="icon-badge blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8.5a12 12 0 0 1 16 0"/><path d="M7 12a8 8 0 0 1 10 0"/><path d="M10 15.5a4 4 0 0 1 4 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/></svg>
-            </div>
-            <h3>Gateway Wi-Fi</h3>
-            <p>Indicado para áreas urbanas, com muitos equipamentos concentrados. Aproveita a rede Wi-Fi já existente no local para conectar os módulos à internet, sem custo de dados adicional.</p>
-          </div>
-          <div class="install-option">
-            <div class="icon-badge gold">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="18" x2="4" y2="14"/><line x1="9.3" y1="18" x2="9.3" y2="10"/><line x1="14.6" y1="18" x2="14.6" y2="6"/><line x1="20" y1="18" x2="20" y2="3"/></svg>
-            </div>
-            <h3>Reservatório-4G</h3>
-            <p>Indicado para áreas rurais ou instalações com poucos equipamentos, sem cobertura Wi-Fi. Leva a conexão direto pela rede celular, sem depender de internet local.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PÁGINA DE CONFIGURAÇÃO DO EQUIPAMENTO ============ -->
-  <section id="configuracao" class="section">
-    <div class="wrap">
-      <div class="section-head center">
-        <p class="kicker">Interface local de configuração</p>
-        <h2>Cada equipamento tem sua própria página de configuração</h2>
-        <p class="lead" style="margin-left:auto;margin-right:auto;">Ao conectar em qualquer módulo RD-RTX2E2S, você acessa uma página de configuração própria dele — aqui usamos a do Reservatório-4G como exemplo, mas o poço, os gateways e as demais variantes de reservatório funcionam da mesma forma.</p>
-      </div>
-
-      <div class="config-grid">
-        <div class="config-shots">
-          <figure class="shot">
-            <img src="img/web1.jpeg" alt="Página de configuração do Reservatório-4G: status de conexões e nível do reservatório" width="739" height="1600" loading="lazy" />
-            <figcaption>Status de conexão e nível do reservatório</figcaption>
-          </figure>
-          <figure class="shot">
-            <img src="img/web2.jpeg" alt="Página de configuração do Reservatório-4G: entradas digitais e status das saídas" width="739" height="1600" loading="lazy" />
-            <figcaption>Entradas digitais e status das saídas</figcaption>
-          </figure>
-        </div>
-        <div class="config-options">
-          <div class="install-option">
-            <div class="icon-badge blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="18" x2="4" y2="14"/><line x1="9.3" y1="18" x2="9.3" y2="10"/><line x1="14.6" y1="18" x2="14.6" y2="6"/><line x1="20" y1="18" x2="20" y2="3"/></svg>
-            </div>
-            <h3>Status de conexões</h3>
-            <p>Mostra a força do sinal, se o equipamento está conectado à internet — 4G ou Wi-Fi, conforme o modelo — e se a comunicação com a plataforma está ativa, tudo de relance.</p>
-          </div>
-          <div class="install-option">
-            <div class="icon-badge gold">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><rect x="7" y="4" width="10" height="16" rx="2"/><line x1="7" y1="13" x2="17" y2="13"/></svg>
-            </div>
-            <h3>Nível do reservatório</h3>
-            <p>O nível medido pela sonda hidrostática aparece em tempo real, com o identificador do reservatório cadastrado.</p>
-          </div>
-          <div class="install-option">
-            <div class="icon-badge blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="8" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
-            </div>
-            <h3>Status das saídas</h3>
-            <p>Cada saída controla uma bomba ligada ao reservatório — em modo Automático, liga e desliga sozinha entre o nível mínimo e máximo configurados, ou em modo Remoto, acionada pela plataforma.</p>
-          </div>
-          <div class="install-option">
-            <div class="icon-badge gold">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-6 4 12 2-6h7"/></svg>
-            </div>
-            <h3>Entradas digitais</h3>
-            <p>Acompanham o status de outro equipamento próximo — como uma bomba de cloro ou qualquer outra bomba externa — direto pela mesma interface do reservatório.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PLATAFORMA DE MONITORAMENTO ============ -->
-  <section id="plataforma" class="section section-muted">
-    <div class="wrap">
-      <div class="section-head center">
-        <p class="kicker">Plataforma web</p>
-        <h2>Todos os poços e reservatórios cadastrados, em um só painel</h2>
-        <p class="lead" style="margin-left:auto;margin-right:auto;">Os dados captados pela sonda hidrostática de cada ponto chegam até você pela plataforma de monitoramento da Jóia Distribuidora, alimentada pelo gateway Wi-Fi ou 4G de cada instalação. Cadastre cada poço e reservatório da propriedade e acompanhe tudo à distância.</p>
-      </div>
-
-      <div class="platform-intro">
-        <div class="platform-probe-card">
-          <img src="img/sonda_hidrostatica.jpg" alt="Sonda hidrostática de nível" width="447" height="489" loading="lazy" />
-        </div>
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div class="footer-brand">
+        <img src="img/logo.png" alt="Jóia Distribuidora" width="581" height="297" />
         <div>
-          <h3>Sonda hidrostática de nível</h3>
-          <p class="lead" style="margin-top:.5rem;">Instalada dentro do poço ou do reservatório, a sonda mede a pressão da coluna d'água e converte essa leitura em nível — o dado que o módulo do Reservatório transmite por rádio LoRa até a plataforma.</p>
-          <ul class="platform-list">
-            <li>
-              <div class="icon-badge gold sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9h17"/><path d="M8 4.5v-1M16 4.5v-1"/></svg>
-              </div>
-              <div><strong>Cadastro de poços e reservatórios</strong><span>Organize cada ponto da propriedade com nome, localização e histórico próprio.</span></div>
-            </li>
-            <li>
-              <div class="icon-badge blue sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M4 19h16" stroke-width="1.6"/></svg>
-              </div>
-              <div><strong>Alertas e histórico de leituras</strong><span>Saiba na hora se algo sai do esperado e consulte o comportamento do nível ao longo do tempo.</span></div>
-            </li>
-          </ul>
+          <strong>Jóia Distribuidora</strong>
+          <span>JOB. MANFRIN</span>
         </div>
       </div>
-
-      <div class="platform-shots">
-        <figure class="shot shot-main">
-          <img src="img/plataforma.jpg" alt="Visão geral da plataforma, com poços e reservatórios cadastrados no mapa" width="1919" height="1200" loading="lazy" />
-          <figcaption>Visão geral — todos os poços e reservatórios cadastrados, com nível e horário da última leitura</figcaption>
-        </figure>
-        <figure class="shot shot-secondary">
-          <img src="img/plataforma2.jpg" alt="Detalhe de um concentrador na plataforma, com reservatórios e bombas" width="1649" height="985" loading="lazy" />
-          <figcaption>Detalhe de um concentrador, com reservatórios e bombas em tempo real</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ SIMULAÇÃO (mantida) ============ -->
-  <section id="simulacao" class="section simulation-section">
-    <div class="wrap">
-      <div class="sim-head">
-        <div class="section-head">
-          <p class="kicker">Telemetria • Rádio, ao vivo</p>
-          <h2>Veja o sistema funcionando</h2>
-          <p class="lead">O reservatório monitora seu nível e transmite o valor via rádio. A casa de bomba (gateway) e o poço escutam a mesma transmissão ao mesmo tempo — o poço liga ou desliga a bomba conforme o setpoint configurado.</p>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Navegação</h4>
+          <a href="#produtos">Produtos</a>
+          <a href="#beneficios">Vantagens</a>
+          <a href="#instalacao">Instalação</a>
+          <a href="#configuracao">Configuração</a>
+          <a href="#plataforma">Plataforma</a>
+          <a href="#simulacao">Como funciona</a>
         </div>
-        <div class="buttons">
-          <button id="toggle">Pausar</button>
-          <button id="reset">Reiniciar</button>
+        <div class="footer-col">
+          <h4>Contato</h4>
+          <a href="tel:+551733235359">(17) 3323-5359</a>
+          <p>Automação e telemetria rural</p>
         </div>
       </div>
-
-      <section class="panel diagram">
-        <svg id="svg" viewBox="0 0 900 446" role="img" aria-label="Diagrama: casa de bomba, poço e reservatório"></svg>
-      </section>
-
-      <section class="panel config">
-        <h2>Configuração</h2>
-        <div class="cfg-grid">
-          <label><div class="row"><span>Nível para LIGAR a bomba</span><span class="val"><span id="v-liga">30</span>%</span></div>
-            <input id="liga" type="range" min="5" max="95" value="30" /></label>
-          <label><div class="row"><span>Nível para DESLIGAR a bomba</span><span class="val"><span id="v-desliga">90</span>%</span></div>
-            <input id="desliga" type="range" min="10" max="100" value="90" /></label>
-          <label><div class="row"><span>Consumo da rede</span><span class="val"><span id="v-consumo">3</span>%/s</span></div>
-            <input id="consumo" type="range" min="0" max="10" value="3" /></label>
-          <label><div class="row"><span>Vazão da bomba</span><span class="val"><span id="v-vazao">7</span>%/s</span></div>
-            <input id="vazao" type="range" min="1" max="15" value="7" /></label>
-        </div>
-      </section>
     </div>
-  </section>
+    <div class="footer-bottom">© 2026 Jóia Distribuidora — JOB. MANFRIN · MEI. Todos os direitos reservados.</div>
+  </footer>
 
-  <!-- ============ CTA FINAL ============ -->
-  <section id="contato" class="final-cta">
-    <svg class="sparkle spark-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z"/></svg>
-    <svg class="sparkle spark-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z"/></svg>
-    <div class="wrap">
-      <p class="kicker on-dark" style="text-align:center;">Pronto para automatizar?</p>
-      <h2>Fale com a Jóia Distribuidora e leve telemetria LoRa e 4G para o seu poço e reservatório</h2>
-      <p class="lead on-dark">Atendimento direto com quem instala e conhece o equipamento na prática.</p>
-      <div class="hero-cta">
-        <a class="btn btn-gold" href="tel:+551733235359">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8.5 6.5 15 15 15l2-4-6-2-2 2c-2.5-1-4-2.5-5-5l2-2-2-6-4 2Z"/></svg>
-          (17) 3323-5359
-        </a>
-      </div>
-    </div>
-  </section>
+  <script>
+    /* ---------------- Navegação ---------------- */
+    const navToggle = document.getElementById("nav-toggle");
+    const navLinks = document.getElementById("nav-links");
+    navToggle.addEventListener("click", () => {
+      const open = navLinks.classList.toggle("open");
+      navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    navLinks.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => {
+      navLinks.classList.remove("open");
+      navToggle.setAttribute("aria-expanded", "false");
+    }));
 
-</main>
+    /* ---------------- Slider de produtos ---------------- */
+    (function () {
+      const track = document.getElementById("products-track");
+      const prevBtn = document.getElementById("products-prev");
+      const nextBtn = document.getElementById("products-next");
+      const dotsWrap = document.getElementById("products-dots");
+      if (!track) return;
+      const cards = Array.from(track.children);
 
-<footer class="site-footer">
-  <div class="wrap footer-grid">
-    <div class="footer-brand">
-      <img src="img/logo.png" alt="Jóia Distribuidora" width="581" height="297" />
-      <div>
-        <strong>Jóia Distribuidora</strong>
-        <span>JOB. MANFRIN</span>
-      </div>
-    </div>
-    <div class="footer-links">
-      <div class="footer-col">
-        <h4>Navegação</h4>
-        <a href="#produtos">Produtos</a>
-        <a href="#beneficios">Vantagens</a>
-        <a href="#instalacao">Instalação</a>
-        <a href="#configuracao">Configuração</a>
-        <a href="#plataforma">Plataforma</a>
-        <a href="#simulacao">Como funciona</a>
-      </div>
-      <div class="footer-col">
-        <h4>Contato</h4>
-        <a href="tel:+551733235359">(17) 3323-5359</a>
-        <p>Automação e telemetria rural</p>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">© 2026 Jóia Distribuidora — JOB. MANFRIN · MEI. Todos os direitos reservados.</div>
-</footer>
+      cards.forEach((card, i) => {
+        const dot = document.createElement("button");
+        dot.setAttribute("aria-label", "Ir para o produto " + (i + 1));
+        dot.addEventListener("click", () => card.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" }));
+        dotsWrap.appendChild(dot);
+      });
+      const dots = Array.from(dotsWrap.children);
 
-<script>
-/* ---------------- Navegação ---------------- */
-const navToggle = document.getElementById("nav-toggle");
-const navLinks = document.getElementById("nav-links");
-navToggle.addEventListener("click", () => {
-  const open = navLinks.classList.toggle("open");
-  navToggle.setAttribute("aria-expanded", open ? "true" : "false");
-});
-navLinks.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => {
-  navLinks.classList.remove("open");
-  navToggle.setAttribute("aria-expanded", "false");
-}));
+      function step() {
+        const gap = parseFloat(getComputedStyle(track).columnGap) || 24;
+        return cards[0].getBoundingClientRect().width + gap;
+      }
+      function updateDots() {
+        const idx = Math.min(dots.length - 1, Math.round(track.scrollLeft / step()));
+        dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+      }
+      prevBtn.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
+      nextBtn.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
+      track.addEventListener("scroll", updateDots, { passive: true });
+      window.addEventListener("resize", updateDots);
+      updateDots();
+    })();
 
-/* ---------------- Slider de produtos ---------------- */
-(function () {
-  const track = document.getElementById("products-track");
-  const prevBtn = document.getElementById("products-prev");
-  const nextBtn = document.getElementById("products-next");
-  const dotsWrap = document.getElementById("products-dots");
-  if (!track) return;
-  const cards = Array.from(track.children);
+    /* ---------------- Popups "Como usar?" ---------------- */
+    (function () {
+      const backdrop = document.getElementById("modal-backdrop");
+      if (!backdrop) return;
+      function closeModals() {
+        backdrop.classList.remove("open");
+        backdrop.querySelectorAll(".usecase-modal.open").forEach((m) => m.classList.remove("open"));
+        document.body.style.overflow = "";
+      }
+      document.querySelectorAll(".btn-usecase").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const modal = document.getElementById("modal-" + btn.dataset.usecase);
+          if (!modal) return;
+          backdrop.querySelectorAll(".usecase-modal.open").forEach((m) => m.classList.remove("open"));
+          modal.classList.add("open");
+          backdrop.classList.add("open");
+          document.body.style.overflow = "hidden";
+        });
+      });
+      document.querySelectorAll(".modal-close").forEach((btn) => btn.addEventListener("click", closeModals));
+      backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeModals(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModals(); });
+    })();
 
-  cards.forEach((card, i) => {
-    const dot = document.createElement("button");
-    dot.setAttribute("aria-label", "Ir para o produto " + (i + 1));
-    dot.addEventListener("click", () => card.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" }));
-    dotsWrap.appendChild(dot);
-  });
-  const dots = Array.from(dotsWrap.children);
+    /* ---------------- Geometria ---------------- */
+    // TOP_PAD abre espaço no topo do desenho para o rótulo de nível (preto/negrito) acima do reservatório
+    const TOP_PAD = 46;
+    const VB_H = 400 + TOP_PAD;
+    const groundY = 260 + TOP_PAD;
+    const cx = 740, tankW = 128, tankX = cx - tankW / 2, tankY = 42 + TOP_PAD;
+    // o cilindro vai do topo (tankY) direto até o chão, sem afunilamento nem coluna
+    const tankH = groundY - tankY, tankBottom = tankY + tankH, rx = tankW / 2, ry = 12;
+    const gwAnt = { x: 100, y: 130 + TOP_PAD }, wellAnt = { x: 498, y: 150 + TOP_PAD };
+    const resAnt = { x: cx + rx - 8, y: 8 + TOP_PAD };
+    const riserX = tankX - 20;
+    const pipeEntryY = groundY - 30;
+    // altura útil do corpo cilíndrico do reservatório (diâmetro constante), usada para escalar o nível
+    const bodyH = tankH - 6;
+    const pipePath = `M 450 ${groundY + 30} L 450 ${groundY - 12} L ${riserX} ${groundY - 12} L ${riserX} ${pipeEntryY} L ${tankX} ${pipeEntryY}`;
+    const hopGw = `M ${resAnt.x} ${resAnt.y} Q ${(resAnt.x + gwAnt.x) / 2} ${resAnt.y - 30} ${gwAnt.x} ${gwAnt.y}`;
+    const hopWell = `M ${resAnt.x} ${resAnt.y} Q ${(resAnt.x + wellAnt.x) / 2} ${resAnt.y + 10} ${wellAnt.x} ${wellAnt.y}`;
+    const HOP_SECONDS = 1.4;
+    const PUBLISH_SECONDS = 1.2; // duração do ícone de nuvem (publicação MQTT) após o gateway receber o sinal
 
-  function step() {
-    const gap = parseFloat(getComputedStyle(track).columnGap) || 24;
-    return cards[0].getBoundingClientRect().width + gap;
-  }
-  function updateDots() {
-    const idx = Math.min(dots.length - 1, Math.round(track.scrollLeft / step()));
-    dots.forEach((d, i) => d.classList.toggle("active", i === idx));
-  }
-  prevBtn.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
-  nextBtn.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
-  track.addEventListener("scroll", updateDots, { passive: true });
-  window.addEventListener("resize", updateDots);
-  updateDots();
-})();
+    /* ---------------- Estado ---------------- */
+    const cfg = { liga: 30, desliga: 90, consumo: 3, vazao: 7 };
+    let running = true;
+    let s;
+    function initialState() {
+      return { time: 0, level: 55, pumpOn: false, phase: "idle", signalType: null, phaseStart: 0, txValue: 0, cloudUntil: 0 };
+    }
+    s = initialState();
 
-/* ---------------- Geometria ---------------- */
-// TOP_PAD abre espaço no topo do desenho para o rótulo de nível (preto/negrito) acima do reservatório
-const TOP_PAD = 46;
-const VB_H = 400 + TOP_PAD;
-const groundY = 260 + TOP_PAD;
-const cx = 740, tankW = 128, tankX = cx - tankW / 2, tankY = 42 + TOP_PAD;
-// o cilindro vai do topo (tankY) direto até o chão, sem afunilamento nem coluna
-const tankH = groundY - tankY, tankBottom = tankY + tankH, rx = tankW / 2, ry = 12;
-const gwAnt = { x: 100, y: 130 + TOP_PAD }, wellAnt = { x: 498, y: 150 + TOP_PAD };
-const resAnt = { x: cx + rx - 8, y: 8 + TOP_PAD };
-const riserX = tankX - 20;
-const pipeEntryY = groundY - 30;
-// altura útil do corpo cilíndrico do reservatório (diâmetro constante), usada para escalar o nível
-const bodyH = tankH - 6;
-const pipePath = `M 450 ${groundY + 30} L 450 ${groundY - 12} L ${riserX} ${groundY - 12} L ${riserX} ${pipeEntryY} L ${tankX} ${pipeEntryY}`;
-const hopGw = `M ${resAnt.x} ${resAnt.y} Q ${(resAnt.x + gwAnt.x) / 2} ${resAnt.y - 30} ${gwAnt.x} ${gwAnt.y}`;
-const hopWell = `M ${resAnt.x} ${resAnt.y} Q ${(resAnt.x + wellAnt.x) / 2} ${resAnt.y + 10} ${wellAnt.x} ${wellAnt.y}`;
-const HOP_SECONDS = 1.4;
-const PUBLISH_SECONDS = 1.2; // duração do ícone de nuvem (publicação MQTT) após o gateway receber o sinal
+    function tick(dt) {
+      s.time += dt;
+      const rate = (s.pumpOn ? cfg.vazao : 0) - cfg.consumo;
+      s.level = Math.min(100, Math.max(0, s.level + rate * dt));
+      const elapsed = s.time - s.phaseStart;
+      if (s.phase === "tx" && elapsed >= HOP_SECONDS) {
+        s.pumpOn = s.signalType === "liga";
+        s.phase = "idle";
+        s.signalType = null;
+        s.cloudUntil = s.time + PUBLISH_SECONDS; // gateway recebeu o sinal: publica no MQTT
+      } else if (s.phase === "idle") {
+        if (!s.pumpOn && s.level <= cfg.liga) startTx("liga");
+        else if (s.pumpOn && s.level >= cfg.desliga) startTx("desliga");
+      }
+    }
+    function startTx(type) {
+      s.phase = "tx"; s.signalType = type; s.phaseStart = s.time; s.txValue = s.level;
+    }
 
-/* ---------------- Estado ---------------- */
-const cfg = { liga: 30, desliga: 90, consumo: 3, vazao: 7 };
-let running = true;
-let s;
-function initialState() {
-  return { time: 0, level: 55, pumpOn: false, phase: "idle", signalType: null, phaseStart: 0, txValue: 0, cloudUntil: 0 };
-}
-s = initialState();
+    /* ---------------- Render ---------------- */
+    const svg = document.getElementById("svg");
 
-function tick(dt) {
-  s.time += dt;
-  const rate = (s.pumpOn ? cfg.vazao : 0) - cfg.consumo;
-  s.level = Math.min(100, Math.max(0, s.level + rate * dt));
-  const elapsed = s.time - s.phaseStart;
-  if (s.phase === "tx" && elapsed >= HOP_SECONDS) {
-    s.pumpOn = s.signalType === "liga";
-    s.phase = "idle";
-    s.signalType = null;
-    s.cloudUntil = s.time + PUBLISH_SECONDS; // gateway recebeu o sinal: publica no MQTT
-  } else if (s.phase === "idle") {
-    if (!s.pumpOn && s.level <= cfg.liga) startTx("liga");
-    else if (s.pumpOn && s.level >= cfg.desliga) startTx("desliga");
-  }
-}
-function startTx(type) {
-  s.phase = "tx"; s.signalType = type; s.phaseStart = s.time; s.txValue = s.level;
-}
-
-/* ---------------- Render ---------------- */
-const svg = document.getElementById("svg");
-
-function ring(x, y, color) {
-  return `<g class="ping-ring" style="transform-origin:${x}px ${y}px">
+    function ring(x, y, color) {
+      return `<g class="ping-ring" style="transform-origin:${x}px ${y}px">
     <circle cx="${x}" cy="${y}" r="14" fill="none" stroke="${color}" stroke-width="2"/></g>`;
-}
-function packet(path, color, label) {
-  return `<g>
+    }
+    function packet(path, color, label) {
+      return `<g>
     <path d="${path}" fill="none" stroke="${color}" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.7"/>
     <g><circle r="6" fill="${color}"/><circle r="10" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.6"/>
       <text y="-16" text-anchor="middle" font-size="10" font-weight="600" fill="${color}" font-family="var(--font-mono)">${label}</text>
       <animateMotion dur="${HOP_SECONDS}s" path="${path}" fill="freeze"/></g></g>`;
-}
-// nuvem com seta de upload: indica que o gateway publicou os dados recebidos na plataforma MQTT
-// (grupo externo só posiciona; a animação CSS fica no grupo interno, pra não conflitar com o transform)
-function cloudIcon(x, y) {
-  return `<g transform="translate(${x} ${y})"><g class="cloud-publish">
+    }
+    // nuvem com seta de upload: indica que o gateway publicou os dados recebidos na plataforma MQTT
+    // (grupo externo só posiciona; a animação CSS fica no grupo interno, pra não conflitar com o transform)
+    function cloudIcon(x, y) {
+      return `<g transform="translate(${x} ${y})"><g class="cloud-publish">
     <ellipse cx="-11" cy="-1" rx="9" ry="8" fill="var(--primary)"/>
     <ellipse cx="11" cy="-1" rx="9" ry="8" fill="var(--primary)"/>
     <ellipse cx="0" cy="-8" rx="13" ry="11" fill="var(--primary)"/>
@@ -871,29 +2606,29 @@ function cloudIcon(x, y) {
     <path d="M -4 -2 L 0 -9 L 4 -2 M 0 -8 L 0 6" fill="none" stroke="var(--primary-foreground)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <text y="27" text-anchor="middle" font-size="9" font-weight="700" font-family="var(--font-mono)" fill="var(--primary)" letter-spacing=".06em">MQTT</text>
   </g></g>`;
-}
+    }
 
-function render() {
-  const level = s.level, pumpOn = s.pumpOn, tx = s.phase === "tx";
-  const publishing = s.time < s.cloudUntil;
-  const waterH = bodyH * (level / 100);
-  const waterY = tankBottom - 3 - waterH;
-  const ligaY = tankBottom - 3 - bodyH * (cfg.liga / 100);
-  const desligaY = tankBottom - 3 - bodyH * (cfg.desliga / 100);
-  const sig = s.signalType === "liga" ? "var(--pump-on)" : "var(--destructive)";
+    function render() {
+      const level = s.level, pumpOn = s.pumpOn, tx = s.phase === "tx";
+      const publishing = s.time < s.cloudUntil;
+      const waterH = bodyH * (level / 100);
+      const waterY = tankBottom - 3 - waterH;
+      const ligaY = tankBottom - 3 - bodyH * (cfg.liga / 100);
+      const desligaY = tankBottom - 3 - bodyH * (cfg.desliga / 100);
+      const sig = s.signalType === "liga" ? "var(--pump-on)" : "var(--destructive)";
 
-  let ladder = "";
-  for (let i = 0; i < 14; i++) {
-    const y = tankY + 14 + i * ((groundY - 24 - tankY) / 14);
-    ladder += `<line x1="${cx - 7}" y1="${y}" x2="${cx + 7}" y2="${y}" stroke="var(--steel)" stroke-width="1" opacity="0.7"/>`;
-  }
-  let rail = "";
-  for (let i = 0; i < 5; i++) {
-    const x = tankX + 6 + (i * (tankW - 12)) / 4;
-    rail += `<line x1="${x}" y1="${tankY - 14}" x2="${x}" y2="${tankY - 2}" stroke="var(--steel)" stroke-width="1.5"/>`;
-  }
+      let ladder = "";
+      for (let i = 0; i < 14; i++) {
+        const y = tankY + 14 + i * ((groundY - 24 - tankY) / 14);
+        ladder += `<line x1="${cx - 7}" y1="${y}" x2="${cx + 7}" y2="${y}" stroke="var(--steel)" stroke-width="1" opacity="0.7"/>`;
+      }
+      let rail = "";
+      for (let i = 0; i < 5; i++) {
+        const x = tankX + 6 + (i * (tankW - 12)) / 4;
+        rail += `<line x1="${x}" y1="${tankY - 14}" x2="${x}" y2="${tankY - 2}" stroke="var(--steel)" stroke-width="1.5"/>`;
+      }
 
-  svg.innerHTML = `
+      svg.innerHTML = `
   <defs>
     <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="var(--water)"/><stop offset="100%" stop-color="var(--water-deep)"/>
@@ -976,66 +2711,67 @@ function render() {
 
   ${tx ? packet(hopGw, sig, s.txValue.toFixed(0) + "%") + packet(hopWell, sig, s.txValue.toFixed(0) + "%") : ""}
   `;
-}
+    }
 
-/* ---------------- Controles ---------------- */
-const inputs = {
-  liga: document.getElementById("liga"),
-  desliga: document.getElementById("desliga"),
-  consumo: document.getElementById("consumo"),
-  vazao: document.getElementById("vazao"),
-};
-function syncLabels() {
-  for (const k in inputs) {
-    inputs[k].value = cfg[k];
-    document.getElementById("v-" + k).textContent = cfg[k];
-  }
-}
-inputs.liga.addEventListener("input", (e) => { cfg.liga = Math.min(+e.target.value, cfg.desliga - 5); syncLabels(); render(); });
-inputs.desliga.addEventListener("input", (e) => { cfg.desliga = Math.max(+e.target.value, cfg.liga + 5); syncLabels(); render(); });
-inputs.consumo.addEventListener("input", (e) => { cfg.consumo = +e.target.value; syncLabels(); });
-inputs.vazao.addEventListener("input", (e) => { cfg.vazao = +e.target.value; syncLabels(); });
+    /* ---------------- Controles ---------------- */
+    const inputs = {
+      liga: document.getElementById("liga"),
+      desliga: document.getElementById("desliga"),
+      consumo: document.getElementById("consumo"),
+      vazao: document.getElementById("vazao"),
+    };
+    function syncLabels() {
+      for (const k in inputs) {
+        inputs[k].value = cfg[k];
+        document.getElementById("v-" + k).textContent = cfg[k];
+      }
+    }
+    inputs.liga.addEventListener("input", (e) => { cfg.liga = Math.min(+e.target.value, cfg.desliga - 5); syncLabels(); render(); });
+    inputs.desliga.addEventListener("input", (e) => { cfg.desliga = Math.max(+e.target.value, cfg.liga + 5); syncLabels(); render(); });
+    inputs.consumo.addEventListener("input", (e) => { cfg.consumo = +e.target.value; syncLabels(); });
+    inputs.vazao.addEventListener("input", (e) => { cfg.vazao = +e.target.value; syncLabels(); });
 
-const toggleBtn = document.getElementById("toggle");
-toggleBtn.addEventListener("click", () => {
-  running = !running;
-  toggleBtn.textContent = running ? "Pausar" : "Iniciar";
-});
-document.getElementById("reset").addEventListener("click", () => { s = initialState(); render(); });
+    const toggleBtn = document.getElementById("toggle");
+    toggleBtn.addEventListener("click", () => {
+      running = !running;
+      toggleBtn.textContent = running ? "Pausar" : "Iniciar";
+    });
+    document.getElementById("reset").addEventListener("click", () => { s = initialState(); render(); });
 
-/* ---------------- Loop ---------------- */
-let lastPhaseStart = -1;
-setInterval(() => {
-  if (!running) return;
-  const before = s.phase;
-  tick(0.1);
-  // redesenha ao iniciar uma transmissão (novos pacotes) e ao terminá-la (aparece a nuvem MQTT)
-  if (s.phase === "tx" && (before !== "tx" || s.phaseStart !== lastPhaseStart)) {
-    lastPhaseStart = s.phaseStart;
+    /* ---------------- Loop ---------------- */
+    let lastPhaseStart = -1;
+    setInterval(() => {
+      if (!running) return;
+      const before = s.phase;
+      tick(0.1);
+      // redesenha ao iniciar uma transmissão (novos pacotes) e ao terminá-la (aparece a nuvem MQTT)
+      if (s.phase === "tx" && (before !== "tx" || s.phaseStart !== lastPhaseStart)) {
+        lastPhaseStart = s.phaseStart;
+        render();
+      } else if (before === "tx" && s.phase !== "tx") {
+        render();
+      } else {
+        updateDynamic();
+      }
+    }, 100);
+
+    // atualização leve: nível, água e estado da bomba, sem recriar os pacotes de rádio
+    function updateDynamic() {
+      const txt = document.getElementById("level-label");
+      if (!txt) return render();
+      txt.textContent = "Nível: " + s.level.toFixed(0) + "%";
+      const waterH = bodyH * (s.level / 100);
+      const waterY = tankBottom - 3 - waterH;
+      const waterRect = svg.querySelector('g[clip-path] rect');
+      if (waterRect) { waterRect.setAttribute("y", waterY); waterRect.setAttribute("height", waterH + 20); }
+      const waterLine = svg.querySelector('g[clip-path] line');
+      if (waterLine) { waterLine.setAttribute("y1", waterY); waterLine.setAttribute("y2", waterY); }
+      if (s.phase === "idle" && svg.querySelector("animateMotion")) render();
+    }
+
+    syncLabels();
     render();
-  } else if (before === "tx" && s.phase !== "tx") {
-    render();
-  } else {
-    updateDynamic();
-  }
-}, 100);
-
-// atualização leve: nível, água e estado da bomba, sem recriar os pacotes de rádio
-function updateDynamic() {
-  const txt = document.getElementById("level-label");
-  if (!txt) return render();
-  txt.textContent = "Nível: " + s.level.toFixed(0) + "%";
-  const waterH = bodyH * (s.level / 100);
-  const waterY = tankBottom - 3 - waterH;
-  const waterRect = svg.querySelector('g[clip-path] rect');
-  if (waterRect) { waterRect.setAttribute("y", waterY); waterRect.setAttribute("height", waterH + 20); }
-  const waterLine = svg.querySelector('g[clip-path] line');
-  if (waterLine) { waterLine.setAttribute("y1", waterY); waterLine.setAttribute("y2", waterY); }
-  if (s.phase === "idle" && svg.querySelector("animateMotion")) render();
-}
-
-syncLabels();
-render();
-</script>
+  </script>
 </body>
+
 </html>
