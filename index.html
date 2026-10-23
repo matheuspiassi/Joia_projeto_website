@@ -537,20 +537,21 @@
 
     .hero .wrap {
       padding: 3rem 1.25rem;
-      min-height: min(40rem, 80vh);
+      min-height: min(52rem, 92vh);
       display: flex;
       align-items: center;
     }
 
     .hero-panel {
-      background: rgba(11, 47, 79, .82);
-      -webkit-backdrop-filter: blur(4px);
-      backdrop-filter: blur(4px);
+      background: rgba(11, 47, 79, .5);
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
       border: 1px solid rgba(242, 248, 252, .12);
       border-radius: 1.25rem;
       padding: 1.75rem 2rem;
       max-width: 36rem;
       box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .5);
+      text-shadow: 0 1px 8px rgba(7, 32, 57, .45);
     }
 
     .hero h1 {
@@ -598,6 +599,54 @@
       width: 12px;
       height: 12px;
       opacity: .35;
+    }
+
+    /* seta indicando para rolar a página */
+    .scroll-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 1.25rem;
+      transform: translateX(-50%);
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand-on-dark);
+      background: rgba(11, 47, 79, .5);
+      border: 1px solid rgba(242, 248, 252, .3);
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+      animation: scroll-bounce 1.8s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    .scroll-hint:hover {
+      background: var(--brand-blue);
+    }
+
+    .scroll-hint svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    @keyframes scroll-bounce {
+
+      0%,
+      100% {
+        transform: translate(-50%, 0);
+      }
+
+      50% {
+        transform: translate(-50%, 8px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-hint {
+        animation: none;
+      }
     }
 
     /* ---------- faixa de especificações ---------- */
@@ -1607,8 +1656,8 @@
         <div class="hero-panel">
           <p class="kicker on-dark">Telemetria LoRa &amp; 4G para cidade e campo</p>
           <h1>Controle o poço e o reservatório <em>de qualquer lugar</em></h1>
-          <p class="lead on-dark">A bomba liga e desliga sozinha, e você acompanha o nível à distância — sem depender de
-            Wi-Fi local.</p>
+          <!-- <p class="lead on-dark">A bomba liga e desliga sozinha, e você acompanha o nível à distância — sem depender de
+            Wi-Fi local.</p> -->
           <div class="hero-cta">
             <a class="btn btn-gold" href="#produtos">Ver produtos</a>
             <a class="btn btn-outline-dark" href="tel:+5517981380204">
@@ -1621,6 +1670,12 @@
           </div>
         </div>
       </div>
+      <a class="scroll-hint" href="#produtos" aria-label="Rolar para os produtos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </a>
     </section>
 
     <!-- ============ FAIXA DE ESPECIFICAÇÕES ============ -->
